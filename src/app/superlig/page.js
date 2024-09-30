@@ -53,11 +53,11 @@ export default function StandingsPage() {
   return (
     <div className={`container mx-auto p-6 ${montserrat.className}`}>
       <h1
-        className={`${michroma.className} text-3xl font-bold text-center mb-4`}
+        className={`${michroma.className} text-xl md:text-3xl font-bold text-center mb-4`}
       >
         Süper Lig Sıralaması
       </h1>
-      <div className="overflow-hidden rounded-lg shadow-lg">
+      <div className="overflow-hidden rounded-lg shadow-lg overflow-x-auto">
         <table className="min-w-full border-gray-300 rounded-lg">
           <thead>
             <tr className="bg-foreground text-black uppercase text-sm">
