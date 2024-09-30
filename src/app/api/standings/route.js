@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 
 const DATA_FILE = path.join(process.cwd(), "data", "data.json");
-const UPDATE_HOUR = 22; // 22:00'de güncelle
+const UPDATE_HOUR = 22; // Güncellenme saati
 
 export async function GET() {
   const now = new Date();
@@ -19,12 +19,16 @@ export async function GET() {
     data = { lastUpdated: null, content: null }; // Başlangıç durumu
   }
 
-  // Eğer veri yoksa veya güncellemeler tarihi bugün değilse ve saat 22:00 ise güncelle
+  // Eğer veri yoksa veya güncellemeler tarihi bugünden önceyse güncelle
   const lastUpdatedDate = data.lastUpdated
     ? new Date(data.lastUpdated).toISOString().split("T")[0]
     : null;
 
-  if (lastUpdatedDate !== currentDate && currentHour === UPDATE_HOUR) {
+  // Güncelleme için koşul: Güncel saat 22:00 veya sonrası ve güncel tarih lastUpdated'dan farklıysa
+  if (
+    (currentHour >= UPDATE_HOUR && lastUpdatedDate !== currentDate) ||
+    lastUpdatedDate === null // Veri yoksa hemen güncelle
+  ) {
     const res = await fetch(
       "https://api.collectapi.com/football/league?data.league=super-lig",
       {
