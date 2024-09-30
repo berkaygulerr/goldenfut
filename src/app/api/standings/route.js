@@ -31,7 +31,7 @@ export async function GET() {
     (currentHour === UPDATE_HOUR &&
       currentMinute >= UPDATE_MINUTE &&
       lastUpdatedDate !== currentDate) ||
-    lastUpdatedDate === null // Veri yoksa hemen güncelle
+    !lastUpdatedDate // Veri yoksa hemen güncelle
   ) {
     const res = await fetch(
       "https://api.collectapi.com/football/league?data.league=super-lig",
