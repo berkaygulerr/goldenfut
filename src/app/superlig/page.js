@@ -16,7 +16,7 @@ export default function StandingsPage() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch("http://localhost:3000/api/standings", {
+      const res = await fetch("https://www.goldenfut.com/api/standings", {
         headers: {
           authorization: process.env.API_KEY,
         },
