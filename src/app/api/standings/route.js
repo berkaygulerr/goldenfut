@@ -28,10 +28,8 @@ export async function GET() {
 
   // Güncelleme için koşul: Saat 22:15 olduğunda ve güncel tarih lastUpdated'dan farklıysa
   if (
-    (currentHour === UPDATE_HOUR &&
-      currentMinute >= UPDATE_MINUTE &&
-      lastUpdatedDate !== currentDate) ||
-    !lastUpdatedDate // Veri yoksa hemen güncelle
+    (currentHour >= UPDATE_HOUR && currentMinute >= UPDATE_MINUTE && lastUpdatedDate !== currentDate) ||
+    lastUpdatedDate === null // Veri yoksa hemen güncelle
   ) {
     const res = await fetch(
       "https://api.collectapi.com/football/league?data.league=super-lig",
