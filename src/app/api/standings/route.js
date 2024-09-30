@@ -37,6 +37,7 @@ export async function GET() {
         headers: {
           authorization: process.env.API_KEY,
         },
+        cache: "no-store"
       }
     );
 
