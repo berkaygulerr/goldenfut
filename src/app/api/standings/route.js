@@ -4,10 +4,12 @@ import path from "path";
 
 const DATA_FILE = path.join(process.cwd(), "data", "data.json");
 const UPDATE_HOUR = 22; // Güncellenme saati
+const UPDATE_MINUTE = 15; // Güncellenme dakikası
 
 export async function GET() {
   const now = new Date();
   const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
   const currentDate = now.toISOString().split("T")[0]; // Bugünün tarihi
   let data;
 
@@ -24,9 +26,11 @@ export async function GET() {
     ? new Date(data.lastUpdated).toISOString().split("T")[0]
     : null;
 
-  // Güncelleme için koşul: Güncel saat 22:00 veya sonrası ve güncel tarih lastUpdated'dan farklıysa
+  // Güncelleme için koşul: Saat 22:15 olduğunda ve güncel tarih lastUpdated'dan farklıysa
   if (
-    (currentHour >= UPDATE_HOUR && lastUpdatedDate !== currentDate) ||
+    (currentHour === UPDATE_HOUR &&
+      currentMinute >= UPDATE_MINUTE &&
+      lastUpdatedDate !== currentDate) ||
     lastUpdatedDate === null // Veri yoksa hemen güncelle
   ) {
     const res = await fetch(
