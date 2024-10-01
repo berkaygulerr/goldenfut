@@ -32,7 +32,6 @@ body {
 }
 
 .social-icon img {
-  width: 30px; /* İkon boyutu */
   transition: transform 0.3s;
   filter: invert(1);
 }

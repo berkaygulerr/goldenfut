@@ -1,4 +1,5 @@
 import "./globals.css";
+import Header from "./components/Header";
 
 export const metadata = {
   title: "GoldenFut",
@@ -8,7 +9,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="flex justify-center items-center">{children}</body>
+      <body>
+        <Header />
+        {children}
+      </body>
     </html>
   );
 }

@@ -1,41 +1,43 @@
-import Image from "next/image";
+"use client";
+
+import React from "react";
+import Standings from "./components/Standings";
 import { Michroma } from "next/font/google";
 
 const michroma = Michroma({ weight: "400", subsets: ["latin"] });
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <Image src="/logo.svg" width={150} height={150} alt="GoldenFut Logo" />
-      <h1 className={`${michroma.className} text-4xl relative my-8`}>
-        Çok Yakında
-      </h1>
-      <div className="flex justify-around w-full max-w-md">
-        <a
-          href="https://www.instagram.com/goldenfutcom"
-          target="_blank"
-          className="social-icon"
-        >
-          <img
-            src="icons/instagram-icon.svg"
-            alt="Instagram"
-            className="social-icon"
-          />
-        </a>
-        <a
-          href="https://twitter.com/goldenfutcom"
-          target="_blank"
-          className="social-icon"
-        >
-          <img src="icons/twitter-icon.svg" alt="X (Twitter)" />
-        </a>
-        <a
-          href="https://www.tiktok.com/@goldenfutcom"
-          target="_blank"
-          className="social-icon"
-        >
-          <img src="icons/tiktok-icon.svg" alt="TikTok" />
-        </a>
+    <div className="container mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
+        <div className="lg:col-span-6">
+          <Standings />
+        </div>
+        <div className="lg:col-span-4 flex justify-center lg:justify-end w-full">
+          {" "}
+          {/* Centering for small screens, aligning right for larger */}
+          <div className="space-y-6 w-full">
+            {" "}
+            {/* Set a max width for larger screens */}
+            <h1
+              className={`${michroma.className} text-xl md:text-3xl text-center mb-4`}
+            >
+              Maçlar
+            </h1>
+            <div className="bg-zinc-800 p-10 shadow rounded-lg w-full">
+              <h3 className="text-center">...</h3>
+              <p className="text-center">...</p>
+            </div>
+            <div className="bg-zinc-800 p-10 shadow rounded-lg w-full">
+              <h3 className="text-center">...</h3>
+              <p className="text-center">...</p>
+            </div>
+            <div className="bg-zinc-800 p-10 shadow rounded-lg w-full">
+              <h3 className="text-center">...</h3>
+              <p className="text-center">...</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
