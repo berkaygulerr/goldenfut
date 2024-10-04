@@ -71,7 +71,7 @@ export default function Standings() {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className={`${montserrat.className}`}>
+    <div className={`${montserrat.className} m-2.5 md:m-0 text-xs sm:text-sm md:text-base`}>
       <h1
         className={`${michroma.className} text-xl md:text-3xl font-bold text-center mb-4`}
       >
@@ -81,7 +81,7 @@ export default function Standings() {
         {menuItems.map((item, index) => (
           <button
             key={index}
-            className={`w-full p-2 md:p-4 rounded-t-lg md:text-base text-xs
+            className={`w-full p-2 sm:p-4 rounded-t-lg
               ${
                 activeTab === index
                   ? "bg-foreground font-bold text-background"
@@ -103,16 +103,16 @@ export default function Standings() {
           >
             <table className="min-w-full border-gray-300 rounded-lg">
               <thead>
-                <tr className="bg-foreground text-background uppercase text-xs sm:text-sm md:text-base">
-                  <th className="py-1 sm:px-3 xl:py-3 lg:px-3 text-left">Takım</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">OM</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">G</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">B</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">M</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">AG</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">YG</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">A</th>
-                  <th className="py-1 xl:py-3 lg:px-3 text-center">P</th>
+                <tr className="bg-foreground text-background uppercase">
+                  <th className="py-2 pl-2 sm:pl-5 sm:py-3 text-left">Takım</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">OM</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">G</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">B</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">M</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">AG</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">YG</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">A</th>
+                  <th className="py-2 sm:py-3 md:px-3 text-center">P</th>
                 </tr>
               </thead>
               <tbody>
@@ -123,24 +123,24 @@ export default function Standings() {
                       idx % 2 === 0 ? "bg-transparent" : "bg-zinc-800"
                     } hover:bg-zinc-700`}
                   >
-                    <td className="py-1 md:py-2 md:px-4 text-white flex items-center">
+                    <td className="px-1 py-2 sm:px-4 text-white flex items-center">
                       <span className="text-foreground font-bold w-5 text-center">
                         {team.rank}
                       </span>
                       <span className="ml-1 md:ml-3 ">{team.team}</span>
                     </td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-center">{team.play}</td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-center">{team.win}</td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-center">{team.draw}</td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-center">{team.lose}</td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-center">{team.goalfor}</td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-center">
+                    <td className="px-1 py-2 sm:px-4 text-center">{team.play}</td>
+                    <td className="px-1 py-2 sm:px-4 text-center">{team.win}</td>
+                    <td className="px-1 py-2 sm:px-4 text-center">{team.draw}</td>
+                    <td className="px-1 py-2 sm:px-4 text-center">{team.lose}</td>
+                    <td className="px-1 py-2 sm:px-4 text-center">{team.goalfor}</td>
+                    <td className="px-1 py-2 sm:px-4 text-center">
                       {team.goalagainst}
                     </td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-center">
+                    <td className="px-1 py-2 sm:px-4 text-center">
                       {team.goaldistance}
                     </td>
-                    <td className="px-1 py-1 lg:py-2 lg:px-4 text-white font-bold text-center">
+                    <td className="px-1 py-2 sm:px-4 text-white font-bold text-center">
                       {team.point}
                     </td>
                   </tr>

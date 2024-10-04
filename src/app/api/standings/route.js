@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
+import fs from "fs/promises"; // Asenkron dosya işlemleri için
 import path from "path";
 
 export async function GET(req) {
@@ -15,78 +15,96 @@ export async function GET(req) {
   const currentDate = now.toISOString().split("T")[0]; // Bugünün tarihi
   let data;
 
-  // Eğer veri dosyası yoksa, yeni bir dosya oluştur
-  if (!fs.existsSync(DATA_FILE)) {
-    console.error("Data file not found, fetching new data.");
+  try {
+    // Eğer veri dosyası yoksa, yeni bir dosya oluştur
+    const fileExists = await fs
+      .access(DATA_FILE)
+      .then(() => true)
+      .catch(() => false);
 
-    // API'den veri çek
-    const res = await fetch(
-      `https://api.collectapi.com/football/league?data.league=${lig}`,
-      {
-        headers: {
-          authorization: process.env.API_KEY,
-        },
-        cache: "no-store",
-      }
-    );
+    if (!fileExists) {
+      console.error("Data file not found, fetching new data.");
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch data" },
-        { status: res.status }
+      // API'den veri çek
+      const res = await fetch(
+        `https://api.collectapi.com/football/league?data.league=${lig}`,
+        {
+          headers: {
+            authorization: process.env.API_KEY,
+          },
+          cache: "no-store",
+        }
       );
-    }
 
-    const result = await res.json();
-    data = { lastUpdated: now.toISOString(), content: result }; // Güncellenmiş veri ve zaman
+      if (!res.ok) {
+        return NextResponse.json(
+          { error: "Failed to fetch data" },
+          { status: res.status }
+        );
+      }
 
-    // Yeni veriyi dosyaya yaz
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data));
-  } else {
-    try {
-      const jsonData = fs.readFileSync(DATA_FILE, "utf-8");
+      const result = await res.json();
+      data = { lastUpdated: now.toISOString(), content: result }; // Güncellenmiş veri ve zaman
+
+      // Yeni veriyi dosyaya yaz
+      console.log("Writing new data to file...");
+      await fs.writeFile(DATA_FILE, JSON.stringify(data));
+      console.log("Data written successfully.");
+    } else {
+      const jsonData = await fs.readFile(DATA_FILE, "utf-8");
       data = JSON.parse(jsonData);
-    } catch (error) {
-      console.error("Error reading data file.");
-      data = { lastUpdated: null, content: null }; // Başlangıç durumu
     }
-  }
 
-  // Eğer veri yoksa veya güncellemeler tarihi bugünden önceyse güncelle
-  const lastUpdatedDate = data.lastUpdated
-    ? new Date(data.lastUpdated).toISOString().split("T")[0]
-    : null;
+    // Eğer veri yoksa veya güncellemeler tarihi bugünden önceyse güncelle
+    const lastUpdatedDate = data.lastUpdated
+      ? new Date(data.lastUpdated).toISOString().split("T")[0]
+      : null;
 
-  // Güncelleme için koşul: Saat 22:15 olduğunda ve güncel tarih lastUpdated'dan farklıysa
-  if (
-    (currentHour >= UPDATE_HOUR &&
-      currentMinute >= UPDATE_MINUTE &&
-      lastUpdatedDate !== currentDate) ||
-    lastUpdatedDate === null // Veri yoksa hemen güncelle
-  ) {
-    const res = await fetch(
-      `https://api.collectapi.com/football/league?data.league=${lig}`,
-      {
-        headers: {
-          authorization: process.env.API_KEY,
-        },
-        cache: "no-store",
-      }
-    );
+    console.log("Last updated date:", lastUpdatedDate);
+    console.log("Current date:", currentDate);
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: "Failed to fetch data" },
-        { status: res.status }
+    // Şu anki saat 22:15 veya sonrasıysa ve son güncelleme tarihi bugünden farklıysa
+    if (
+      lastUpdatedDate !== currentDate &&
+      (currentHour > UPDATE_HOUR ||
+        (currentHour === UPDATE_HOUR && currentMinute >= UPDATE_MINUTE))
+    ) {
+      console.log(
+        "Updating data because it is past 22:15 and the last update is from a different day."
       );
+
+      const res = await fetch(
+        `https://api.collectapi.com/football/league?data.league=${lig}`,
+        {
+          headers: {
+            authorization: process.env.API_KEY,
+          },
+          cache: "no-store",
+        }
+      );
+
+      if (!res.ok) {
+        return NextResponse.json(
+          { error: "Failed to fetch data" },
+          { status: res.status }
+        );
+      }
+
+      const result = await res.json();
+      data = { lastUpdated: now.toISOString(), content: result }; // Güncellenmiş veri ve zaman
+
+      // Yeni veriyi dosyaya yaz
+      console.log("Writing updated data to file...");
+      await fs.writeFile(DATA_FILE, JSON.stringify(data));
+      console.log("Updated data written successfully.");
     }
 
-    const result = await res.json();
-    data = { lastUpdated: now.toISOString(), content: result }; // Güncellenmiş veri ve zaman
-
-    // Yeni veriyi dosyaya yaz
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data));
+    return NextResponse.json(data.content);
+  } catch (error) {
+    console.error("Error handling data:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json(data.content);
 }

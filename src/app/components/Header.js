@@ -16,7 +16,6 @@ const Header = () => {
           <Image src="/logo.svg" width="67" height="0" alt="GoldenFut Logo" />
         </Link>
       </div>
-
       {/* Slogan Section */}
       <div className="text-center lg:text-left w-full lg:w-auto">
         <h2 className={`${montserrat.className} text-white`}>
