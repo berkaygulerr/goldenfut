@@ -1,5 +1,6 @@
 import puppeteer from "puppeteer";
 import { NextResponse } from "next/server";
+import chromium from "chrome-aws-lambda";
 
 // Ön bellek için değişkenler
 let cache = {};
@@ -8,9 +9,12 @@ const CACHE_EXPIRY_TIME = 60000; // 1 dakika (ms cinsinden)
 
 // Veriyi çekme fonksiyonu
 const fetchData = async (lig) => {
-  const browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"], // Vercel için gerekli argümanlar
-    headless: true, // Tarayıcıyı başsız modda çalıştır
+  const browser = await chromium.puppeteer.launch({
+    args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: true,
+    ignoreHTTPSErrors: true,
   });
 
   const page = await browser.newPage();
