@@ -7,7 +7,6 @@ let lastFetchTime = {};
 const CACHE_EXPIRY_TIME = 600000; // 10 dakika (ms cinsinden)
 
 export async function GET(req) {
-  // URL parametrelerini al
   const { searchParams } = new URL(req.url);
   const lig = searchParams.get("lig");
 
@@ -26,13 +25,12 @@ export async function GET(req) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  // Dinamik URL oluşturma
   const url = `https://beinsports.com.tr/lig/${lig}/puan-durumu`;
-  await page.goto(url, { waitUntil: "domcontentloaded" }); // JavaScript yüklenmeden önce döngüden çık
+  await page.goto(url, { waitUntil: "domcontentloaded" });
 
   // Verileri çekme
   try {
-    await page.waitForSelector("table.table", { timeout: 10000 }); // 10 saniyeye kadar bekle
+    await page.waitForSelector("table.table", { timeout: 10000 });
 
     const data = await page.evaluate(() => {
       const rows = Array.from(document.querySelectorAll("table.table tr"));
@@ -72,15 +70,14 @@ export async function GET(req) {
       return puanDurumu;
     });
 
-    // Verileri cache'le
     cache[lig] = data;
     lastFetchTime[lig] = Date.now();
 
     return NextResponse.json({ result: data }, { status: 200 });
   } catch (error) {
-    console.error("Veri çekme hatası:", error.message); // Hata durumunda konsola yazdır
+    console.error("Veri çekme hatası:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   } finally {
-    await browser.close(); // Tarayıcıyı her durumda kapat
+    await browser.close();
   }
 }

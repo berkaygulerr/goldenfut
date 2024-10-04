@@ -1,15 +1,15 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "src/app/**/*",
-      "use": "@vercel/next"
-    }
+      {
+          "src": "src/app/**/*",
+          "use": "@vercel/next"
+      }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/puan-durumu"
-    }
+      {
+          "src": "/api/(.*)",
+          "dest": "https://goldenfut-api.onrender.com/api/$1"
+      }
   ]
 }

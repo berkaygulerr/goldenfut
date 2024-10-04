@@ -62,7 +62,7 @@ export default function Standings() {
     try {
       const allData = await Promise.all(
         menuItems.map((item) =>
-          fetch(`/api/puan-durumu?lig=${item.slug}`).then((res) => res.json())
+          fetch(`https://goldenfut-api.onrender.com/api/puan-durumu?lig=${item.slug}`).then((res) => res.json())
         )
       );
       setData(allData.map((result) => result.result));
