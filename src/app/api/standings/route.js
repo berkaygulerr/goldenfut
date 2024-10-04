@@ -65,7 +65,7 @@ export async function GET(req) {
       // Eğer güncelleme tarihi bugünden önceyse veya hiç güncellenmemişse, veriyi yeniden çek ve dosyayı güncelle
       if (
         !lastUpdatedDate || // Eğer dosya daha önce hiç güncellenmemişse
-        (lastUpdatedDate === currentDate && ( // Eğer bugünse, saati ve dakikayı kontrol et
+        (lastUpdatedDate !== currentDate && ( // Eğer bugünse, saati ve dakikayı kontrol et
           currentHour > UPDATE_HOUR ||
           (currentHour === UPDATE_HOUR && currentMinute >= UPDATE_MINUTE)
         ))
