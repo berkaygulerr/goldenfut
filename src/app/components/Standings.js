@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { Michroma, Montserrat } from "next/font/google";
+import Tab from "./Tab";
 
 // Font ayarları
 const montserrat = Montserrat({
@@ -22,6 +23,7 @@ export default function Standings() {
 
   const [activeTab, setActiveTab] = useState(null);
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const tableContainerRef = useRef(null);
 
@@ -56,22 +58,28 @@ export default function Standings() {
   };
 
   const fetchAllData = async () => {
+    setLoading(true); // Veri yükleniyor
     try {
       const allData = await Promise.all(
         menuItems.map((item) =>
-          fetch(`/api/standings?lig=${item.slug}`).then((res) => res.json())
+          fetch(`/api/puan-durumu?lig=${item.slug}`).then((res) => res.json())
         )
       );
       setData(allData.map((result) => result.result));
     } catch (error) {
       setError("Veri alınırken hata oluştu");
+    } finally {
+      setLoading(false); // Veri yüklendi
     }
   };
 
+  if (loading) return <p>Veriler yükleniyor...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className={`${montserrat.className} m-2.5 md:m-0 text-xs sm:text-sm md:text-base`}>
+    <div
+      className={`${montserrat.className} m-2.5 md:m-0 md:ml-2.5 text-xs sm:text-sm md:text-base`}
+    >
       <h1
         className={`${michroma.className} text-xl md:text-3xl font-bold text-center mb-4`}
       >
@@ -79,19 +87,13 @@ export default function Standings() {
       </h1>
       <div className="flex justify-center w-full overflow-x-auto">
         {menuItems.map((item, index) => (
-          <button
+          <Tab
             key={index}
-            className={`w-full p-2 sm:p-4 rounded-t-lg
-              ${
-                activeTab === index
-                  ? "bg-foreground font-bold text-background"
-                  : "bg-transparent text-zinc-400 hover:bg-zinc-800 focus:bg-zinc-700"
-              }
-            `}
-            onClick={() => handleTabClick(index)}
-          >
-            {item.lig}
-          </button>
+            activeTab={activeTab}
+            item={item}
+            index={index}
+            handleTabClick={handleTabClick}
+          />
         ))}
       </div>
       {/* Tablolar Konteyneri */}
@@ -116,35 +118,53 @@ export default function Standings() {
                 </tr>
               </thead>
               <tbody>
-                {data[index]?.map((team, idx) => (
-                  <tr
-                    key={team.team}
-                    className={`${
-                      idx % 2 === 0 ? "bg-transparent" : "bg-zinc-800"
-                    } hover:bg-zinc-700`}
-                  >
-                    <td className="px-1 py-2 sm:px-4 text-white flex items-center">
-                      <span className="text-foreground font-bold w-5 text-center">
-                        {team.rank}
-                      </span>
-                      <span className="ml-1 md:ml-3 ">{team.team}</span>
-                    </td>
-                    <td className="px-1 py-2 sm:px-4 text-center">{team.play}</td>
-                    <td className="px-1 py-2 sm:px-4 text-center">{team.win}</td>
-                    <td className="px-1 py-2 sm:px-4 text-center">{team.draw}</td>
-                    <td className="px-1 py-2 sm:px-4 text-center">{team.lose}</td>
-                    <td className="px-1 py-2 sm:px-4 text-center">{team.goalfor}</td>
-                    <td className="px-1 py-2 sm:px-4 text-center">
-                      {team.goalagainst}
-                    </td>
-                    <td className="px-1 py-2 sm:px-4 text-center">
-                      {team.goaldistance}
-                    </td>
-                    <td className="px-1 py-2 sm:px-4 text-white font-bold text-center">
-                      {team.point}
+                {Array.isArray(data[index]) ? (
+                  data[index].map((team, idx) => (
+                    <tr
+                      key={team.team}
+                      className={`${
+                        idx % 2 === 0 ? "bg-transparent" : "bg-zinc-800"
+                      } hover:bg-zinc-700`}
+                    >
+                      <td className="px-1 py-2 sm:px-4 text-white flex items-center">
+                        <span className="text-foreground font-bold w-5 text-center">
+                          {team.rank}
+                        </span>
+                        <span className="ml-1 md:ml-3">{team.team}</span>
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-center">
+                        {team.played}
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-center">
+                        {team.wins}
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-center">
+                        {team.draws}
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-center">
+                        {team.losses}
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-center">
+                        {team.goalfor}
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-center">
+                        {team.goalagainst}
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-center">
+                        {team.goaldistance}
+                      </td>
+                      <td className="px-1 py-2 sm:px-4 text-white font-bold text-center">
+                        {team.points}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="text-center py-4 text-red-500">
+                      Veri bulunamadı
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
