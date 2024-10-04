@@ -10,7 +10,9 @@ const CACHE_EXPIRY_TIME = 60000; // 1 dakika (ms cinsinden)
 const fetchData = async (lig) => {
   const browser = await puppeteer.launch({
     args: ["--no-sandbox", "--disable-setuid-sandbox"], // Vercel için gerekli argümanlar
+    headless: true, // Tarayıcıyı başsız modda çalıştır
   });
+
   const page = await browser.newPage();
   const url = `https://beinsports.com.tr/lig/${lig}/puan-durumu`;
 
