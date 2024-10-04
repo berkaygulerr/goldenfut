@@ -8,12 +8,14 @@ const CACHE_EXPIRY_TIME = 60000; // 1 dakika (ms cinsinden)
 
 // Veriyi çekme fonksiyonu
 const fetchData = async (lig) => {
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // Vercel için gerekli argümanlar
+  });
   const page = await browser.newPage();
   const url = `https://beinsports.com.tr/lig/${lig}/puan-durumu`;
 
-  await page.goto(url, { waitUntil: "domcontentloaded" });
   try {
+    await page.goto(url, { waitUntil: "domcontentloaded" });
     await page.waitForSelector("table.table", { timeout: 10000 });
 
     const data = await page.evaluate(() => {
@@ -57,8 +59,10 @@ const fetchData = async (lig) => {
     // Verileri cache'le
     cache[lig] = data;
     lastFetchTime[lig] = Date.now();
+    return data;
   } catch (error) {
     console.error("Veri çekme hatası:", error.message);
+    throw new Error("Veri çekme işlemi sırasında bir hata oluştu.");
   } finally {
     await browser.close();
   }
@@ -80,15 +84,10 @@ export async function GET(req) {
     return NextResponse.json({ result: cache[lig] }, { status: 200 });
   }
 
-  // Eğer veri yoksa, başlangıçta veriyi çek
-  await fetchData(lig);
-
-  return NextResponse.json({ result: cache[lig] }, { status: 200 });
-}
-
-// İlk veri çekim işlemini yap
-export const cronFetchData = async (ligler) => {
-  for (const lig of ligler) {
-    await fetchData(lig);
+  try {
+    const data = await fetchData(lig);
+    return NextResponse.json({ result: data }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-};
+}
