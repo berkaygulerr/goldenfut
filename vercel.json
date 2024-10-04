@@ -9,7 +9,7 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "https://your-render-app-url/api/$1"
+      "dest": "/api/puan-durumu"
     }
   ]
 }
