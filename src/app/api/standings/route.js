@@ -12,7 +12,8 @@ export async function GET(req) {
   const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
-  const currentDate = now.toISOString().split("T")[0]; // Bugünün tarihi
+  const currentDate = now.toISOString().split("T")[0]; // Bugünün tarihi (gün, ay, yıl)
+
   let data;
 
   try {
@@ -48,55 +49,54 @@ export async function GET(req) {
 
       // Yeni veriyi dosyaya yaz
       console.log("Writing new data to file...");
-      await fs.writeFile(DATA_FILE, JSON.stringify(data));
+      await fs.writeFile(DATA_FILE, JSON.stringify(data), "utf-8");
       console.log("Data written successfully.");
     } else {
       const jsonData = await fs.readFile(DATA_FILE, "utf-8");
       data = JSON.parse(jsonData);
-    }
 
-    // Eğer veri yoksa veya güncellemeler tarihi bugünden önceyse güncelle
-    const lastUpdatedDate = data.lastUpdated
-      ? new Date(data.lastUpdated).toISOString().split("T")[0]
-      : null;
+      const lastUpdatedDate = data.lastUpdated
+        ? new Date(data.lastUpdated).toISOString().split("T")[0] // Son güncelleme tarihini alın (gün, ay, yıl)
+        : null;
 
-    console.log("Last updated date:", lastUpdatedDate);
-    console.log("Current date:", currentDate);
+      console.log("Last updated date:", lastUpdatedDate);
+      console.log("Current date:", currentDate);
 
-    // Şu anki saat 22:15 veya sonrasıysa ve son güncelleme tarihi bugünden farklıysa
-    if (
-      lastUpdatedDate !== currentDate &&
-      (currentHour > UPDATE_HOUR ||
-        (currentHour === UPDATE_HOUR && currentMinute >= UPDATE_MINUTE))
-    ) {
-      console.log(
-        "Updating data because it is past 22:15 and the last update is from a different day."
-      );
+      // Eğer güncelleme tarihi bugünden önceyse veya hiç güncellenmemişse, veriyi yeniden çek ve dosyayı güncelle
+      if (
+        !lastUpdatedDate || // Eğer dosya daha önce hiç güncellenmemişse
+        (lastUpdatedDate === currentDate && ( // Eğer bugünse, saati ve dakikayı kontrol et
+          currentHour > UPDATE_HOUR ||
+          (currentHour === UPDATE_HOUR && currentMinute >= UPDATE_MINUTE)
+        ))
+      ) {
+        console.log("Fetching new data from API...");
 
-      const res = await fetch(
-        `https://api.collectapi.com/football/league?data.league=${lig}`,
-        {
-          headers: {
-            authorization: process.env.API_KEY,
-          },
-          cache: "no-store",
-        }
-      );
-
-      if (!res.ok) {
-        return NextResponse.json(
-          { error: "Failed to fetch data" },
-          { status: res.status }
+        const res = await fetch(
+          `https://api.collectapi.com/football/league?data.league=${lig}`,
+          {
+            headers: {
+              authorization: process.env.API_KEY,
+            },
+            cache: "no-store",
+          }
         );
+
+        if (!res.ok) {
+          return NextResponse.json(
+            { error: "Failed to fetch data" },
+            { status: res.status }
+          );
+        }
+
+        const result = await res.json();
+        data = { lastUpdated: now.toISOString(), content: result }; // Güncellenmiş veri ve zaman
+
+        // Eski veriyi silip yeni veriyi yaz
+        console.log("Overwriting file with updated data...");
+        await fs.writeFile(DATA_FILE, JSON.stringify(data), "utf-8");
+        console.log("Updated data written successfully.");
       }
-
-      const result = await res.json();
-      data = { lastUpdated: now.toISOString(), content: result }; // Güncellenmiş veri ve zaman
-
-      // Yeni veriyi dosyaya yaz
-      console.log("Writing updated data to file...");
-      await fs.writeFile(DATA_FILE, JSON.stringify(data));
-      console.log("Updated data written successfully.");
     }
 
     return NextResponse.json(data.content);
