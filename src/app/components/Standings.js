@@ -62,7 +62,7 @@ export default function Standings() {
     try {
       const allData = await Promise.all(
         menuItems.map((item) =>
-          fetch(`/api/puan-durumu?lig=${item.slug}`).then((res) => res.json())
+          fetch(`/api/standings?lig=${item.slug}`).then((res) => res.json())
         )
       );
       setData(allData.map((result) => result.result));
@@ -133,16 +133,16 @@ export default function Standings() {
                         <span className="ml-1 md:ml-3">{team.team}</span>
                       </td>
                       <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.played}
+                        {team.play}
                       </td>
                       <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.wins}
+                        {team.win}
                       </td>
                       <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.draws}
+                        {team.draw}
                       </td>
                       <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.losses}
+                        {team.lose}
                       </td>
                       <td className="px-1 py-2 sm:px-4 text-center">
                         {team.goalfor}
@@ -154,7 +154,7 @@ export default function Standings() {
                         {team.goaldistance}
                       </td>
                       <td className="px-1 py-2 sm:px-4 text-white font-bold text-center">
-                        {team.points}
+                        {team.point}
                       </td>
                     </tr>
                   ))
