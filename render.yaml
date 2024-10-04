@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: goldenfut-api
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free
+    region: oregon
+    staticPublishPath: ./build
