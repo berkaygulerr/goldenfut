@@ -8,15 +8,8 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1a1a;
-    --foreground: #f4b22f;
-  }
+  --background: #1a1a1a;
+  --foreground: #f4b22f;
 }
 
 body {
@@ -38,5 +31,6 @@ body {
 
 .social-icon img:hover {
   transform: scale(1.1); /* Hover'da büyütme efekti */
-  filter: invert(66%) sepia(93%) saturate(394%) hue-rotate(350deg) brightness(98%) contrast(94%);
+  filter: invert(66%) sepia(93%) saturate(394%) hue-rotate(350deg)
+    brightness(98%) contrast(94%);
 }
