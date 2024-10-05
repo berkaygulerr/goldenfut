@@ -11,17 +11,17 @@ const montserrat = Montserrat({
 });
 const michroma = Michroma({ weight: "400", subsets: ["latin"] });
 
-export default function Standings() {
-  const menuItems = [
-    { lig: "Super Lig", slug: "super-lig" },
-    { lig: "Premier Lig", slug: "ingiltere-premier-ligi" },
-    { lig: "La Liga", slug: "ispanya-la-liga" },
-    { lig: "Bundesliga", slug: "almanya-bundesliga" },
-    { lig: "Serie A", slug: "italya-serie-a-ligi" },
-    { lig: "Ligue 1", slug: "fransa-ligue-1" },
-  ];
+const menuItems = [
+  { lig: "Süper Lig", slug: "super-lig", code: "TR1" },
+  { lig: "Premier Lig", slug: "premier-league", code: "GB1" },
+  { lig: "La Liga", slug: "laliga", code: "ES1" },
+  { lig: "Bundesliga", slug: "bundesliga", code: "L1" },
+  { lig: "Serie A", slug: "serie-a", code: "IT1" },
+  { lig: "Ligue 1", slug: "ligue-1", code: "FR1" },
+];
 
-  const [activeTab, setActiveTab] = useState(null);
+export default function Standings() {
+  const [activeTab, setActiveTab] = useState(0);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,21 +32,14 @@ export default function Standings() {
   }, []);
 
   useEffect(() => {
-    if (data.length > 0) {
-      const lastActiveTab = localStorage.getItem("lastActiveTab");
-      if (lastActiveTab) {
-        setActiveTab(Number(lastActiveTab));
-      } else {
-        setActiveTab(0);
-      }
-    }
+    const lastActiveTab = localStorage.getItem("lastActiveTab");
+    setActiveTab(lastActiveTab ? Number(lastActiveTab) : 0);
   }, [data]);
 
   useEffect(() => {
     if (tableContainerRef.current) {
-      const tableWidth = tableContainerRef.current.offsetWidth;
       tableContainerRef.current.scrollTo({
-        left: tableWidth * activeTab,
+        left: tableContainerRef.current.offsetWidth * activeTab,
         behavior: "smooth",
       });
     }
@@ -58,18 +51,21 @@ export default function Standings() {
   };
 
   const fetchAllData = async () => {
-    setLoading(true); // Veri yükleniyor
+    setLoading(true);
     try {
       const allData = await Promise.all(
         menuItems.map((item) =>
-          fetch(`/api/standings?lig=${item.slug}`).then((res) => res.json())
+          fetch(`/api/puan-durumu?lig=${item.slug}&code=${item.code}`).then(
+            (res) => res.json()
+          )
         )
       );
-      setData(allData.map((result) => result.result));
-    } catch (error) {
+      console.log("Gelen tüm veriler:", allData);
+      setData(allData);
+    } catch {
       setError("Veri alınırken hata oluştu");
     } finally {
-      setLoading(false); // Veri yüklendi
+      setLoading(false);
     }
   };
 
@@ -78,7 +74,7 @@ export default function Standings() {
 
   return (
     <div
-      className={`${montserrat.className} m-2.5 md:m-0 md:ml-2.5 text-xs sm:text-sm md:text-base`}
+      className={`${montserrat.className} m-2.5 md:m-0 text-xs sm:text-sm md:text-base`}
     >
       <h1
         className={`${michroma.className} text-xl md:text-3xl font-bold text-center mb-4`}
@@ -96,7 +92,6 @@ export default function Standings() {
           />
         ))}
       </div>
-      {/* Tablolar Konteyneri */}
       <div className="flex overflow-x-hidden w-full" ref={tableContainerRef}>
         {menuItems.map((item, index) => (
           <div
@@ -107,14 +102,14 @@ export default function Standings() {
               <thead>
                 <tr className="bg-foreground text-background uppercase">
                   <th className="py-2 pl-2 sm:pl-5 sm:py-3 text-left">Takım</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">OM</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">G</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">B</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">M</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">AG</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">YG</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">A</th>
-                  <th className="py-2 sm:py-3 md:px-3 text-center">P</th>
+                  {["OM", "G", "B", "M", "AG", "YG", "A", "P"].map((header) => (
+                    <th
+                      key={header}
+                      className="py-2 sm:py-3 md:px-3 text-center"
+                    >
+                      {header}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -132,30 +127,20 @@ export default function Standings() {
                         </span>
                         <span className="ml-1 md:ml-3">{team.team}</span>
                       </td>
-                      <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.play}
-                      </td>
-                      <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.win}
-                      </td>
-                      <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.draw}
-                      </td>
-                      <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.lose}
-                      </td>
-                      <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.goalfor}
-                      </td>
-                      <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.goalagainst}
-                      </td>
-                      <td className="px-1 py-2 sm:px-4 text-center">
-                        {team.goaldistance}
-                      </td>
-                      <td className="px-1 py-2 sm:px-4 text-white font-bold text-center">
-                        {team.point}
-                      </td>
+                      {[
+                        "play",
+                        "win",
+                        "draw",
+                        "lose",
+                        "goalfor",
+                        "goalagainst",
+                        "goaldistance",
+                        "point",
+                      ].map((key) => (
+                        <td key={key} className="px-1 py-2 sm:px-4 text-center">
+                          {team[key]}
+                        </td>
+                      ))}
                     </tr>
                   ))
                 ) : (
