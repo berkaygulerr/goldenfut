@@ -23,10 +23,20 @@ export default function Standings() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [liveScores, setLiveScores] = useState(null); // Canlı skorlar için bir state
   const tableContainerRef = useRef(null);
 
   useEffect(() => {
     fetchAllData();
+    fetchLiveScore(); // API'den canlı skor verisini çek
+
+    // Canlı skoru her dakika güncellemek için interval oluştur
+    const intervalId = setInterval(() => {
+      fetchLiveScore();
+    }, 60000); // 60000 ms = 1 dakika
+
+    // Bileşen unmount olduğunda interval'i temizle
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -73,6 +83,29 @@ export default function Standings() {
     }
   };
 
+  // Burada canlı skoru çekiyoruz
+  const fetchLiveScore = async () => {
+    try {
+      const response = await fetch("/api/live-score");
+
+      if (!response.ok) {
+        throw new Error(`HTTP hatası: ${response.status}`);
+      }
+
+      const data = await response.json(); // Canlı skoru konsola yazdır
+
+      console.log("Canlı skor verisi:", data);
+
+      if (!data || data.length === 0) {
+        console.warn("Canlı skor verisi boş döndü!");
+      } else {
+        setLiveScores(data);
+      }
+    } catch (error) {
+      console.error("Canlı skor verisi çekilirken hata oluştu:", error);
+    }
+  };
+
   if (loading) return <p>Veriler yükleniyor...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -83,7 +116,7 @@ export default function Standings() {
       <h1
         className={`${michroma.className} text-xl md:text-3xl font-bold text-center mb-4`}
       >
-        Puan Durumu
+        Canlı Puan Durumu
       </h1>
       <div className="flex justify-center w-full overflow-x-auto">
         {menuItems.map((item, index) => (
@@ -125,11 +158,52 @@ export default function Standings() {
                         idx % 2 === 0 ? "bg-transparent" : "bg-zinc-800"
                       } hover:bg-zinc-700`}
                     >
-                      <td className="px-1 py-2 sm:px-4 text-white flex items-center">
+                      <td className="px-1 py-2 sm:px-4 text-white flex">
                         <span className="text-foreground font-bold w-5 text-center">
                           {team.rank}
                         </span>
-                        <span className="ml-1 md:ml-3">{team.team}</span>
+                        <div className='flex justify-between'></div>
+                        <span className="ml-1 md:ml-3">{team.team}</span>{" "}
+                        {liveScores ? liveScores.map((liveScore) => {
+                          const isHomeTeam = team.team === liveScore.homeTeam;
+                          const isAwayTeam = team.team === liveScore.awayTeam;
+
+                          // Skorları parse et
+                          const [homeScore, awayScore] = liveScore.score
+                            .split(":")
+                            .map(Number);
+
+                          // Sadece canlı maç oynayan takımlar için skor göster
+                          if (isHomeTeam || isAwayTeam) {
+                            let backgroundColor = "";
+
+                            if (homeScore > awayScore) {
+                              backgroundColor = isHomeTeam
+                                ? "bg-green-600"
+                                : "bg-red-600";
+                            } else if (awayScore > homeScore) {
+                              backgroundColor = isAwayTeam
+                                ? "bg-green-600"
+                                : "bg-red-600";
+                            } else {
+                              // Beraberlik durumunda arka plan rengi yok, metin rengi varsayılan olacak
+                              backgroundColor = "bg-gray-500";
+                            }
+
+                            return (
+                              <div
+                                key={liveScore.time} // Benzersiz key (zamanı kullanıyoruz)
+                                className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto mr-[20%] sm:mr-[0%] md:mr-[15%] lg:mr-[0%] xl:mr-[15%] 2xl:mr-[30%] ${backgroundColor}`}
+                                
+                              >
+                                {liveScore.score}
+                              </div>
+                            );
+                          }
+
+                          // Maç oynamayan takım için skor gösterme
+                          return null;
+                        }) : null}
                       </td>
                       {[
                         "play",
