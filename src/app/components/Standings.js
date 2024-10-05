@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useRef, useState } from "react";
 import { Michroma, Montserrat } from "next/font/google";
 import Tab from "./Tab";
@@ -32,11 +30,6 @@ export default function Standings() {
   }, []);
 
   useEffect(() => {
-    const lastActiveTab = localStorage.getItem("lastActiveTab");
-    setActiveTab(lastActiveTab ? Number(lastActiveTab) : 0);
-  }, [data]);
-
-  useEffect(() => {
     if (tableContainerRef.current) {
       tableContainerRef.current.scrollTo({
         left: tableContainerRef.current.offsetWidth * activeTab,
@@ -62,6 +55,9 @@ export default function Standings() {
       );
       console.log("Gelen tüm veriler:", allData);
       setData(allData);
+      // Burada son aktif sekmeyi ayarlıyoruz.
+      const lastActiveTab = localStorage.getItem("lastActiveTab");
+      setActiveTab(lastActiveTab ? Number(lastActiveTab) : 0);
     } catch {
       setError("Veri alınırken hata oluştu");
     } finally {
