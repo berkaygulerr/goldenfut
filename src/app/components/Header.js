@@ -9,7 +9,7 @@ const montserrat = Montserrat({
 
 const Header = () => {
   return (
-    <div className="lg:container flex flex-col lg:flex-row items-center justify-between py-10 mx-auto space-y-6 lg:space-y-0">
+    <div className="lg:container flex flex-col lg:flex-row items-center justify-around py-10 mx-auto space-y-6 lg:space-y-0">
       {/* Logo Section */}
       <div className="flex justify-center lg:justify-start w-full lg:w-auto">
         <Link href="/">
