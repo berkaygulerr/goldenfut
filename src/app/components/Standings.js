@@ -54,15 +54,15 @@ export default function Standings() {
               cache: "no-store", // CDN cache devrede
             }
           );
-  
+
           const data = await response.json();
           return data;
         })
       );
-  
+
       console.log("Gelen tüm veriler:", allData);
       setData(allData);
-  
+
       // Burada son aktif sekmeyi ayarlıyoruz.
       const lastActiveTab = localStorage.getItem("lastActiveTab");
       setActiveTab(lastActiveTab ? Number(lastActiveTab) : 0);
@@ -72,7 +72,6 @@ export default function Standings() {
       setLoading(false);
     }
   };
-  
 
   if (loading) return <p>Veriler yükleniyor...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -140,12 +139,15 @@ export default function Standings() {
                         "goalfor",
                         "goalagainst",
                         "goaldistance",
-                        "point",
                       ].map((key) => (
                         <td key={key} className="px-1 py-2 sm:px-4 text-center">
                           {team[key]}
                         </td>
                       ))}
+                      {/* Point verisi için ayrı bir td */}
+                      <td className="px-1 py-2 sm:px-4 text-center text-white font-bold">
+                        {team.point}
+                      </td>
                     </tr>
                   ))
                 ) : (
