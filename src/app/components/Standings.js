@@ -48,45 +48,21 @@ export default function Standings() {
     try {
       const allData = await Promise.all(
         menuItems.map(async (item) => {
-          const cacheKey = `${item.slug}-${item.code}`;
-          const cachedData = localStorage.getItem(cacheKey);
-          const cacheTime = localStorage.getItem(`${cacheKey}-time`);
-          const now = Date.now();
-
-          // Cache kontrolü
-          if (
-            cachedData &&
-            cacheTime &&
-            now - Number(cacheTime) < 5 * 60 * 1000
-          ) {
-            console.log(`Veri cache'den alındı: ${item.lig}`);
-            return JSON.parse(cachedData);
-          }
-
-          // Cache'de veri yoksa API'den çek
           const response = await fetch(
             `/api/puan-durumu?lig=${item.slug}&code=${item.code}`,
             {
-              cache: "no-store", // Sunucu cache kontrolü
+              cache: "no-store", // CDN cache devrede
             }
           );
-
+  
           const data = await response.json();
-
-          // Yeni veriyi localStorage'a kaydet
-          localStorage.setItem(cacheKey, JSON.stringify(data));
-          localStorage.setItem(`${cacheKey}-time`, now);
-
-          console.log(
-            `Veri Transfermarkt'tan çekildi ve cache'lendi: ${item.lig}`
-          );
           return data;
         })
       );
-
+  
       console.log("Gelen tüm veriler:", allData);
       setData(allData);
-
+  
       // Burada son aktif sekmeyi ayarlıyoruz.
       const lastActiveTab = localStorage.getItem("lastActiveTab");
       setActiveTab(lastActiveTab ? Number(lastActiveTab) : 0);
@@ -96,6 +72,7 @@ export default function Standings() {
       setLoading(false);
     }
   };
+  
 
   if (loading) return <p>Veriler yükleniyor...</p>;
   if (error) return <p>Error: {error}</p>;

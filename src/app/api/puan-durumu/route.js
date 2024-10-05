@@ -2,10 +2,6 @@ import { NextResponse } from "next/server";
 import axios from "axios";
 import cheerio from "cheerio";
 
-// In-memory cache
-let cache = {};
-const CACHE_DURATION = 10 * 60 * 1000; // 10 dakika (milisaniye)
-
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const lig = searchParams.get("lig");
@@ -16,15 +12,6 @@ export async function GET(req) {
       { error: "Lig ve code parametreleri gerekli" },
       { status: 400 }
     );
-  }
-
-  const cacheKey = `${lig}-${code}`;
-  const now = Date.now();
-
-  // Cache kontrolü
-  if (cache[cacheKey] && now - cache[cacheKey].timestamp < CACHE_DURATION) {
-    console.log("Veri cache'den alındı.");
-    return NextResponse.json(cache[cacheKey].data);
   }
 
   try {
@@ -73,14 +60,14 @@ export async function GET(req) {
       });
     });
 
-    // Cache'e veriyi kaydet
-    cache[cacheKey] = {
-      timestamp: now,
-      data: standings,
-    };
+    console.log("Veri Transfermarkt'tan çekildi.");
 
-    console.log("Veri Transfermarkt'tan çekildi ve cache'lendi.");
-    return NextResponse.json(standings);
+    // Cache-Control başlığı ekleniyor
+    return NextResponse.json(standings, {
+      headers: {
+        "Cache-Control": "s-maxage=600, stale-while-revalidate=60",
+      },
+    });
   } catch (error) {
     console.error("Veri çekme hatası: ", error);
     return NextResponse.json({ error: "Veri çekme hatası" }, { status: 500 });
