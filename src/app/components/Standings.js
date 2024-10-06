@@ -167,14 +167,13 @@ export default function Standings() {
                         <span className="text-foreground font-bold w-5 text-center">
                           {team.rank}
                         </span>
-                        <div className="flex justify-between"></div>
                         <span className="ml-1 md:ml-3">{team.team}</span>{" "}
                         {liveScores
                           ? liveScores.map((liveScore) => {
                               const isHomeTeam =
-                                team.team === liveScore.homeTeam;
+                                team.team.split(" ")[0] === liveScore.homeTeam;
                               const isAwayTeam =
-                                team.team === liveScore.awayTeam;
+                                team.team.split(" ")[0] === liveScore.awayTeam;
 
                               // Skorları parse et
                               const [homeScore, awayScore] = liveScore.score
