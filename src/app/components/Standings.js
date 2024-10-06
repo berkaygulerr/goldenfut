@@ -30,11 +30,15 @@ export default function Standings() {
     fetchAllData();
     fetchLiveScore(); // API'den canlı skor verisini çek
 
-    // Canlı skoru her dakika güncellemek için interval oluştur
-    const intervalId = setInterval(() => {
-      fetchLiveScore();
-      fetchAllData();
-    }, 30000); // 60000 ms = 1 dakika
+    // Canlı skoru her 30 saniyede bir güncellemek için interval oluştur
+    const intervalId = setInterval(async () => {
+      const liveScores = await fetchLiveScore(); // Canlı skorları çek
+
+      // Eğer canlı maç varsa puan durumunu güncelle
+      if (liveScores && liveScores.length > 0) {
+        fetchAllData();
+      }
+    }, 30000); // 30000 ms = 30 saniye
 
     // Bileşen unmount olduğunda interval'i temizle
     return () => clearInterval(intervalId);
