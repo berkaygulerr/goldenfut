@@ -33,7 +33,8 @@ export default function Standings() {
     // Canlı skoru her dakika güncellemek için interval oluştur
     const intervalId = setInterval(() => {
       fetchLiveScore();
-    }, 60000); // 60000 ms = 1 dakika
+      fetchAllData();
+    }, 30000); // 60000 ms = 1 dakika
 
     // Bileşen unmount olduğunda interval'i temizle
     return () => clearInterval(intervalId);
@@ -162,48 +163,48 @@ export default function Standings() {
                         <span className="text-foreground font-bold w-5 text-center">
                           {team.rank}
                         </span>
-                        <div className='flex justify-between'></div>
+                        <div className="flex justify-between"></div>
                         <span className="ml-1 md:ml-3">{team.team}</span>{" "}
-                        {liveScores ? liveScores.map((liveScore) => {
-                          const isHomeTeam = team.team === liveScore.homeTeam;
-                          const isAwayTeam = team.team === liveScore.awayTeam;
+                        {liveScores
+                          ? liveScores.map((liveScore) => {
+                              const isHomeTeam =
+                                team.team === liveScore.homeTeam;
+                              const isAwayTeam =
+                                team.team === liveScore.awayTeam;
 
-                          // Skorları parse et
-                          const [homeScore, awayScore] = liveScore.score
-                            .split(":")
-                            .map(Number);
+                              // Skorları parse et
+                              const [homeScore, awayScore] = liveScore.score
+                                .split(":")
+                                .map(Number);
 
-                          // Sadece canlı maç oynayan takımlar için skor göster
-                          if (isHomeTeam || isAwayTeam) {
-                            let backgroundColor = "";
+                              // Sadece canlı maç oynayan takımlar için skor göster
+                              if (isHomeTeam || isAwayTeam) {
+                                let backgroundColor = "";
 
-                            if (homeScore > awayScore) {
-                              backgroundColor = isHomeTeam
-                                ? "bg-green-600"
-                                : "bg-red-600";
-                            } else if (awayScore > homeScore) {
-                              backgroundColor = isAwayTeam
-                                ? "bg-green-600"
-                                : "bg-red-600";
-                            } else {
-                              // Beraberlik durumunda arka plan rengi yok, metin rengi varsayılan olacak
-                              backgroundColor = "bg-gray-500";
-                            }
+                                if (homeScore !== awayScore) {
+                                  backgroundColor =
+                                    (isHomeTeam && homeScore > awayScore) ||
+                                    (isAwayTeam && awayScore > homeScore)
+                                      ? "bg-green-600"
+                                      : "bg-red-600";
+                                } else {
+                                  backgroundColor = "bg-gray-500"; // Beraberlik durumu
+                                }
 
-                            return (
-                              <div
-                                key={liveScore.time} // Benzersiz key (zamanı kullanıyoruz)
-                                className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto mr-[20%] sm:mr-[0%] md:mr-[15%] lg:mr-[0%] xl:mr-[15%] 2xl:mr-[30%] ${backgroundColor}`}
-                                
-                              >
-                                {liveScore.score}
-                              </div>
-                            );
-                          }
+                                return (
+                                  <span
+                                    key={liveScore.time} // Benzersiz key (zamanı kullanıyoruz)
+                                    className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto mr-[20%] sm:mr-[0%] md:mr-[15%] lg:mr-[0%] xl:mr-[15%] 2xl:mr-[30%] ${backgroundColor}`}
+                                  >
+                                    {liveScore.score}
+                                  </span>
+                                );
+                              }
 
-                          // Maç oynamayan takım için skor gösterme
-                          return null;
-                        }) : null}
+                              // Maç oynamayan takım için skor gösterme
+                              return null;
+                            })
+                          : null}
                       </td>
                       {[
                         "play",
