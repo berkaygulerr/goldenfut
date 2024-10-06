@@ -18,13 +18,7 @@ export async function GET() {
     const url = "https://www.transfermarkt.com/live/";
 
     // Sayfanın HTML içeriğini al
-    const { data } = await axios.get(url, {
-      headers: {
-        "Cache-Control": "no-store", // Ön bellekleme devre dışı
-        Pragma: "no-cache", // HTTP/1.0 için ön bellekleme devre dışı
-        Expires: "0", // Geçerlilik süresini 0 yaparak ön belleklemeyi devre dışı bırak
-      },
-    });
+    const { data } = await fetch('api/example', { cache: 'no-cache', next: { revalidate: 0 }});
 
     // Cheerio'yu kullanarak HTML içeriğini parse et
     const $ = cheerio.load(data);
