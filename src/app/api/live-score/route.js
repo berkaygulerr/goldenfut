@@ -3,16 +3,15 @@ export const fetchCache = "force-no-store";
 import axios from "axios";
 import { NextResponse } from "next/server";
 import cheerio from "cheerio";
-import next from "next";
 
 // 6 büyük ligin kodlarını tanımlıyoruz
 const majorLeagues = [
-  "Süper Lig",
-  "Premier Lig",
-  "La Liga",
-  "Bundesliga",
-  "Serie A",
-  "Ligue 1",
+  { lig: "Süper Lig", code: "TR1" },
+  { lig: "Premier Lig", code: "GB1" },
+  { lig: "LaLiga", code: "ES1" },
+  { lig: "Bundesliga", code: "L1" },
+  { lig: "Serie A", code: "IT1" },
+  { lig: "Ligue 1", code: "FR1" },
 ];
 
 export async function GET() {
@@ -47,29 +46,29 @@ export async function GET() {
     // İlk 25 kategori için tabloyu al
     categories.slice(0, 25).each((index, element) => {
       const leagueName = $(element).text().trim();
+      const leagueCode = $(element).find("a").attr("href").split("/").pop(); // href'ten kodu al
 
       // Eğer bu lig 6 büyük ligden biriyse, livescore tablosunu al
-      if (majorLeagues.includes(leagueName)) {
+      const leagueData = majorLeagues.find((l) => l.code === leagueCode);
+      if (leagueData) {
         const scoreTable = $(element).next(".livescore"); // hemen altındaki livescore tablosu
         if (scoreTable.length) {
           // Tablo satırlarını seç
           scoreTable.find("tbody tr").each((i, row) => {
             const time = $(row).find("td:nth-child(1)").text().trim();
-            const homeTeam = $(row)
-              .find("td:nth-child(3)")
-              .text()
-              .trim()
-              .split(" ")[0]; // İlk kelimeyi al
+            const homeTeam = $(row).find("td:nth-child(3)").text().trim(); // Full adı al
             const score = $(row).find("td:nth-child(4)").text().trim();
-            const awayTeam = $(row)
-              .find("td:nth-child(5)")
-              .text()
-              .trim()
-              .split(" ")[0]; // İlk kelimeyi al
+            const awayTeam = $(row).find("td:nth-child(5)").text().trim(); // Full adı al
 
             // Eğer time verisi ' ile bitiyorsa, verileri diziye ekle
             if (time.endsWith("'")) {
-              liveScores.push({ time, homeTeam, score, awayTeam, leagueName });
+              liveScores.push({
+                time,
+                homeTeam,
+                score,
+                awayTeam,
+                league: leagueData.lig,
+              });
             }
           });
         }
