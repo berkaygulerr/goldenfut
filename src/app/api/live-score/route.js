@@ -23,7 +23,7 @@ export async function GET() {
     // Fetch ile isteği yap
     const response = await fetch(url, {
       next: {
-        revalidate: 30,
+        revalidate: 15,
       },
     });
 
