@@ -71,7 +71,6 @@ export default function Standings() {
         })
       );
 
-      console.log("Gelen tüm veriler:", allData);
       setData(allData);
 
       const lastActiveTab = localStorage.getItem("lastActiveTab");
@@ -92,7 +91,6 @@ export default function Standings() {
       }
 
       const data = await response.json();
-      console.log("Canlı skor verisi:", data);
 
       if (!data || data.length === 0) {
         console.warn("Canlı skor verisi boş döndü!");
