@@ -1,3 +1,5 @@
+export const fetchCache = "force-no-store";
+
 import { NextResponse } from "next/server";
 import axios from "axios";
 import cheerio from "cheerio";
@@ -15,18 +17,29 @@ export async function GET(req) {
   }
 
   try {
-    // Transfermarkt URL'si
     const url = `https://www.transfermarkt.com.tr/${lig}/tabelle/wettbewerb/${code}`;
-    const response = await axios.get(url);
+    const response = await fetch(url, {
+      next: {
+        revalidate: 15,
+      },
+    });
 
-    // Cheerio ile HTML'yi yükle
-    const $ = cheerio.load(response.data);
+    if (!response.ok) {
+      throw new Error(`HTTP hata: ${response.status}`);
+    }
+
+    const data = await response.text();
+    const $ = cheerio.load(data);
     const standings = [];
 
-    // Tabloyu seç ve veriyi çek
     $("table.items tbody tr").each((index, element) => {
       const rank = $(element).find("td.rechts").first().text().trim();
       const team = $(element).find("td.hauptlink a").text().trim();
+      const teamId = $(element)
+        .find("td.hauptlink a")
+        .attr("href")
+        .split("/")[4]; // ID'yi al
+
       const play = $(element).find("td.zentriert:nth-child(4)").text().trim(); // Maç sayısı
       const win = $(element).find("td.zentriert:nth-child(5)").text().trim(); // Galibiyet sayısı
       const draw = $(element).find("td.zentriert:nth-child(6)").text().trim(); // Beraberlik sayısı
@@ -48,6 +61,7 @@ export async function GET(req) {
       standings.push({
         rank,
         team,
+        id: teamId, // ID'yi ekle
         play,
         win,
         draw,
@@ -62,11 +76,11 @@ export async function GET(req) {
 
     console.log("Veri Transfermarkt'tan çekildi.");
 
-    // Cache-Control başlığı ekleniyor
     return NextResponse.json(standings, {
       headers: {
-        "Cache-Control": "s-maxage=600, stale-while-revalidate=60",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
       },
+      revalidate: 0, // Her istekte güncelle
     });
   } catch (error) {
     console.error("Veri çekme hatası: ", error);

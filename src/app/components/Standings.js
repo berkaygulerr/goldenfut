@@ -164,25 +164,28 @@ export default function Standings() {
                         {liveScores
                           ? liveScores.map((liveScore) => {
                               const isHomeTeam =
-                                team.team.substring(0, 3) ===
-                                liveScore.homeTeam.substring(0, 3);
+                                team.id === liveScore.homeTeam.id;
                               const isAwayTeam =
-                                team.team.substring(0, 3) ===
-                                liveScore.awayTeam.substring(0, 3);
+                                team.id === liveScore.awayTeam.id;
 
                               const [homeScore, awayScore] = liveScore.score
                                 .split(":")
                                 .map(Number);
 
                               if (isHomeTeam || isAwayTeam) {
+                                let isHalfTime = liveScore.score.split(" ")[1];
                                 let backgroundColor = "";
+                                let textColor = "";
 
-                                if (homeScore !== awayScore) {
+                                if (homeScore !== awayScore && !isHalfTime) {
                                   backgroundColor =
                                     (isHomeTeam && homeScore > awayScore) ||
                                     (isAwayTeam && awayScore > homeScore)
                                       ? "bg-green-600"
                                       : "bg-red-600";
+                                } else if (isHalfTime) {
+                                  backgroundColor = "bg-foreground";
+                                  textColor = "text-background";
                                 } else {
                                   backgroundColor = "bg-gray-500"; // Beraberlik durumu
                                 }
@@ -190,9 +193,12 @@ export default function Standings() {
                                 return (
                                   <span
                                     key={liveScore.time} // Benzersiz key (zamanı kullanıyoruz)
-                                    className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto ${backgroundColor}`}
+                                    className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto ${backgroundColor} ${textColor}`}
                                   >
-                                    {liveScore.score}
+                                    {liveScore.score.split(" ")[0]}{" "}
+                                    {liveScore.score.split(" ")[1]
+                                      ? "İY"
+                                      : null}
                                   </span>
                                 );
                               }

@@ -56,17 +56,33 @@ export async function GET() {
           // Tablo satırlarını seç
           scoreTable.find("tbody tr").each((i, row) => {
             const time = $(row).find("td:nth-child(1)").text().trim();
-            const homeTeam = $(row).find("td:nth-child(3)").text().trim(); // Full adı al
+
+            // Ev sahibi takım adı ve id'si
+            const homeTeamElement = $(row).find("td:nth-child(3) a");
+            const homeTeamName = homeTeamElement.text().trim();
+            const homeTeamId = homeTeamElement.attr("href").split("/").pop();
+
+            // Skor bilgisi
             const score = $(row).find("td:nth-child(4)").text().trim();
-            const awayTeam = $(row).find("td:nth-child(5)").text().trim(); // Full adı al
+
+            // Deplasman takımı adı ve id'si
+            const awayTeamElement = $(row).find("td:nth-child(5) a");
+            const awayTeamName = awayTeamElement.text().trim();
+            const awayTeamId = awayTeamElement.attr("href").split("/").pop();
 
             // Eğer time verisi ' ile bitiyorsa, verileri diziye ekle
             if (time.endsWith("'")) {
               liveScores.push({
                 time,
-                homeTeam,
+                homeTeam: {
+                  name: homeTeamName,
+                  id: homeTeamId,
+                },
                 score,
-                awayTeam,
+                awayTeam: {
+                  name: awayTeamName,
+                  id: awayTeamId,
+                },
                 league: leagueData.lig,
               });
             }
