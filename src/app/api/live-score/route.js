@@ -61,11 +61,12 @@ export async function GET() {
       }
     });
 
-    // Sonuçları yazdır
-    console.log("Seçilen canlı skorlar:", liveScores);
-
-    // JSON formatında cevap döndür
-    return NextResponse.json(liveScores);
+    // Cache-Control başlığıyla cache'i devre dışı bırak
+    return NextResponse.json(liveScores, {
+      headers: {
+        "Cache-Control": "no-store, max-age=0",
+      },
+    });
   } catch (error) {
     console.error("Hata:", error);
     return NextResponse.json(
