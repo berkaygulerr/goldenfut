@@ -64,8 +64,9 @@ export async function GET() {
     // Cache-Control başlığıyla cache'i devre dışı bırak
     return NextResponse.json(liveScores, {
       headers: {
-        "Cache-Control": "no-store, max-age=0",
+        "Cache-Control": "no-cache, no-store, must-revalidate",
       },
+      revalidate: 0, // Her istekte güncelle
     });
   } catch (error) {
     console.error("Hata:", error);
