@@ -21,27 +21,22 @@ const menuItems = [
 export default function Standings() {
   const [activeTab, setActiveTab] = useState(0);
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // İlk yüklemede loading
   const [error, setError] = useState(null);
-  const [liveScores, setLiveScores] = useState(null); // Canlı skorlar için bir state
+  const [liveScores, setLiveScores] = useState(null);
   const tableContainerRef = useRef(null);
 
   useEffect(() => {
-    fetchAllData();
-    fetchLiveScore(); // API'den canlı skor verisini çek
+    fetchAllData(); // İlk veri yüklemesini başlat
+    fetchLiveScore(); // Canlı skoru çek
 
-    // Canlı skoru her 30 saniyede bir güncellemek için interval oluştur
+    // Canlı skoru ve puan durumunu her 30 saniyede bir güncelle
     const intervalId = setInterval(async () => {
-      const liveScores = await fetchLiveScore(); // Canlı skorları çek
-
-      // Eğer canlı maç varsa puan durumunu güncelle
-      if (liveScores && liveScores.length > 0) {
-        fetchAllData();
-      }
+      fetchLiveScore(); // Canlı skoru güncelle
+      fetchAllData(false); // Diğer güncellemeleri loading durumunu kullanmadan yap
     }, 30000); // 30000 ms = 30 saniye
 
-    // Bileşen unmount olduğunda interval'i temizle
-    return () => clearInterval(intervalId);
+    return () => clearInterval(intervalId); // Bileşen unmount olduğunda interval'i temizle
   }, []);
 
   useEffect(() => {
@@ -58,15 +53,16 @@ export default function Standings() {
     localStorage.setItem("lastActiveTab", index);
   };
 
-  const fetchAllData = async () => {
-    setLoading(true);
+  const fetchAllData = async (initialLoad = true) => {
+    if (initialLoad) setLoading(true); // Yükleme durumunu başlat
+
     try {
       const allData = await Promise.all(
         menuItems.map(async (item) => {
           const response = await fetch(
             `/api/puan-durumu?lig=${item.slug}&code=${item.code}`,
             {
-              cache: "no-store", // CDN cache devrede
+              cache: "no-store",
             }
           );
 
@@ -78,17 +74,15 @@ export default function Standings() {
       console.log("Gelen tüm veriler:", allData);
       setData(allData);
 
-      // Burada son aktif sekmeyi ayarlıyoruz.
       const lastActiveTab = localStorage.getItem("lastActiveTab");
       setActiveTab(lastActiveTab ? Number(lastActiveTab) : 0);
     } catch {
       setError("Veri alınırken hata oluştu");
     } finally {
-      setLoading(false);
+      if (initialLoad) setLoading(false); // İlk yüklemede loading durumunu bitir
     }
   };
 
-  // Burada canlı skoru çekiyoruz
   const fetchLiveScore = async () => {
     try {
       const response = await fetch("/api/live-score");
@@ -97,8 +91,7 @@ export default function Standings() {
         throw new Error(`HTTP hatası: ${response.status}`);
       }
 
-      const data = await response.json(); // Canlı skoru konsola yazdır
-
+      const data = await response.json();
       console.log("Canlı skor verisi:", data);
 
       if (!data || data.length === 0) {
@@ -111,7 +104,7 @@ export default function Standings() {
     }
   };
 
-  if (loading) return <p>Veriler yükleniyor...</p>;
+  if (loading) return <p>Veriler yükleniyor...</p>; // Yalnızca ilk yüklemede gösterilecek
   if (error) return <p>Error: {error}</p>;
 
   return (
@@ -171,16 +164,16 @@ export default function Standings() {
                         {liveScores
                           ? liveScores.map((liveScore) => {
                               const isHomeTeam =
-                                team.team.split(" ")[0] === liveScore.homeTeam;
+                                team.team.substring(0, 3) ===
+                                liveScore.homeTeam.substring(0, 3);
                               const isAwayTeam =
-                                team.team.split(" ")[0] === liveScore.awayTeam;
+                                team.team.substring(0, 3) ===
+                                liveScore.awayTeam.substring(0, 3);
 
-                              // Skorları parse et
                               const [homeScore, awayScore] = liveScore.score
                                 .split(":")
                                 .map(Number);
 
-                              // Sadece canlı maç oynayan takımlar için skor göster
                               if (isHomeTeam || isAwayTeam) {
                                 let backgroundColor = "";
 
@@ -197,14 +190,13 @@ export default function Standings() {
                                 return (
                                   <span
                                     key={liveScore.time} // Benzersiz key (zamanı kullanıyoruz)
-                                    className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto mr-[20%] sm:mr-[0%] md:mr-[15%] lg:mr-[0%] xl:mr-[15%] 2xl:mr-[30%] ${backgroundColor}`}
+                                    className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto ${backgroundColor}`}
                                   >
                                     {liveScore.score}
                                   </span>
                                 );
                               }
 
-                              // Maç oynamayan takım için skor gösterme
                               return null;
                             })
                           : null}
@@ -222,7 +214,6 @@ export default function Standings() {
                           {team[key]}
                         </td>
                       ))}
-                      {/* Point verisi için ayrı bir td */}
                       <td className="px-1 py-2 sm:px-4 text-center text-white font-bold">
                         {team.point}
                       </td>
