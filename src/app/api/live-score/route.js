@@ -1,7 +1,8 @@
+export const fetchCache = "force-no-store";
+
 import axios from "axios";
 import { NextResponse } from "next/server";
 import cheerio from "cheerio";
-import fetch from "node-fetch";
 
 // 6 büyük ligin kodlarını tanımlıyoruz
 const majorLeagues = [
@@ -18,24 +19,14 @@ export async function GET() {
     // Transfermarkt canlı skor sayfasının URL'si
     const url = "https://www.transfermarkt.com/live/";
 
-    // Fetch ile isteği yap
-    const response = await fetch(url, {
+    // Sayfanın HTML içeriğini al
+    const { data } = await axios.get(url, {
       headers: {
-        'Cache-Control': 'no-store', // Ön belleklemeyi devre dışı bırak
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        "Cache-Control": "no-store", // Ön bellekleme devre dışı
+        Pragma: "no-cache", // HTTP/1.0 için ön bellekleme devre dışı
+        Expires: "0", // Geçerlilik süresini 0 yaparak ön belleklemeyi devre dışı bırak
       },
     });
-
-    // Eğer yanıt başarılı değilse hata fırlat
-    if (!response.ok) {
-      throw new Error(`HTTP hata: ${response.status}`);
-    }
-
-    // Yanıtın metin formatındaki içeriğini al
-    const data = await response.text();
-
-    console.log(data);
 
     // Cheerio'yu kullanarak HTML içeriğini parse et
     const $ = cheerio.load(data);
