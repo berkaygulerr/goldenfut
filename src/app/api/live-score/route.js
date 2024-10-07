@@ -1,6 +1,3 @@
-export const fetchCache = "force-no-store";
-
-import axios from "axios";
 import { NextResponse } from "next/server";
 import cheerio from "cheerio";
 
