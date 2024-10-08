@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 const Table = ({ data, liveScores, tableHeader, tableData }) => (
   <div className="flex-none w-full min-w-[240px] sm:min-w-[280px] md:min-w-[350px]">
@@ -28,7 +29,6 @@ const Table = ({ data, liveScores, tableHeader, tableData }) => (
           <tr>
             <td colSpan="9" className="text-center py-4 text-red-500">
               Veri bulunamadı
-              {console.log(data)}
             </td>
           </tr>
         )}
@@ -37,41 +37,92 @@ const Table = ({ data, liveScores, tableHeader, tableData }) => (
   </div>
 );
 
+function europeanCompetition(europeanCompetition) {
+  switch (europeanCompetition) {
+    case "Champions League":
+      return "bg-blue-600";
+    case "Champions League Qualifiers":
+      return "bg-blue-800";
+    case "Europa League":
+      return "bg-orange-600";
+    case "Conference League":
+      return "bg-green-600";
+    case "Conference League Qualifiers":
+      return "bg-green-800";
+    default:
+      break;
+  }
+}
+
+function relegationStatus(relegationStatus) {
+  switch (relegationStatus) {
+    case true:
+      return "bg-red-800";
+    case "playoff":
+      return "bg-orange-700";
+    default:
+      break;
+  }
+}
+
 const TableRow = ({ team, idx, liveScores, tableData }) => (
   <tr
     className={`${
       idx % 2 === 0 ? "bg-transparent" : "bg-zinc-800"
     } hover:bg-zinc-700`}
   >
-    <td className="px-1 py-2 sm:px-4 text-white flex">
-      <span className="text-foreground font-bold w-5 text-center">
+    <td className="relative px-1 py-2 sm:px-4 text-white flex items-center">
+      <div
+        className={`absolute left-0 top-0 bottom-0 w-1 ${europeanCompetition(
+          team.europeanCompetition
+        )} ${relegationStatus(team.relegationStatus)}`}
+      ></div>
+      <span className="text-foreground font-bold ml-1 sm:ml-0 w-5 text-center sm:text-lg">
         {team.rank}
       </span>
-      <span className="ml-1 md:ml-3">{team.team}</span>
+      <div className="relative w-7 h-7 ml-3 mr-1.5 my-0.5">
+        {" "}
+        {/* Resim için yatay boşluk */}
+        <Image
+          src={team.logo}
+          alt={`${team.name} Logo`}
+          fill
+          className={`object-contain ${
+            team.team === "Juventus" ? "filter brightness-0 invert" : ""
+          } ${team.team === "Antalyaspor" ? "bg-white rounded-full" : ""} `} // Resmin kapsayıcıya göre ayarlanmasını sağlar
+        />
+      </div>
+      <span className="ml-1">{team.team}</span>
       {liveScores ? (
         <LiveScoreIndicator team={team} liveScores={liveScores} />
       ) : null}
     </td>
     {tableData.map((key) => (
-      <td key={key} className="px-1 py-2 sm:px-4 text-center">
-        {team[key]}
+      <td key={key} className={"px-1 py-2 sm:px-4 text-center"}>
+        <span
+          className={`${key === "win" ? "text-green-500 font-semibold" : ""} ${
+            key === "draw" ? "text-zinc-400 font-semibold" : ""
+          }${key === "lose" ? "text-red-500 font-semibold" : ""}`}
+        >
+          {team[key]}
+        </span>
       </td>
     ))}
-    <td className="px-1 py-2 sm:px-4 text-center text-white font-bold">
+    <td className="px-1 py-2 sm:px-4 text-center text-white font-bold sm:text-lg">
       {team.point}
     </td>
   </tr>
 );
 
 const LiveScoreIndicator = ({ team, liveScores }) => {
-  return liveScores.map((liveScore) => {
+  return liveScores ? liveScores.map((liveScore) => {
     const isHomeTeam = team.id == liveScore.homeTeam.id;
     const isAwayTeam = team.id == liveScore.awayTeam.id;
     const [homeScore, awayScore] = liveScore.score.split(":").map(Number);
 
     if (isHomeTeam || isAwayTeam) {
       const isHalfTime = liveScore.score.split(" ")[1];
-      
+
       const backgroundColor = getScoreBackgroundColor(
         homeScore,
         awayScore,
@@ -90,7 +141,7 @@ const LiveScoreIndicator = ({ team, liveScores }) => {
       );
     }
     return null;
-  });
+  }) : null;
 };
 
 const getScoreBackgroundColor = (
