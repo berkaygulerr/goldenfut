@@ -208,6 +208,7 @@ const Standings = () => {
       >
         {menuItems.map((item, index) => (
           <Table
+            key={index}
             data={data[index]}
             liveScores={liveScores}
             tableHeader={["OM", "G", "B", "M", "AG", "YG", "A", "P"]}
