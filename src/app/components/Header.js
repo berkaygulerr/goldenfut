@@ -31,10 +31,11 @@ const Header = () => {
           target="_blank"
           className="social-icon"
         >
-          <img
+          <Image
             src="icons/instagram-icon.svg"
             alt="Instagram"
-            className="social-icon w-6"
+            className="social-icon"
+            width="24" height="0"
           />
         </a>
         <a
@@ -42,10 +43,11 @@ const Header = () => {
           target="_blank"
           className="social-icon"
         >
-          <img
+          <Image
             src="icons/twitter-icon.svg"
             alt="X (Twitter)"
-            className="social-icon w-6"
+            className="social-icon"
+            width="24" height="0"
           />
         </a>
         <a
@@ -53,10 +55,11 @@ const Header = () => {
           target="_blank"
           className="social-icon"
         >
-          <img
+          <Image
             src="icons/tiktok-icon.svg"
             alt="TikTok"
-            className="social-icon w-6"
+            className="social-icon"
+            width="24" height="0"
           />
         </a>
       </div>

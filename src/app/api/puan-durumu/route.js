@@ -173,7 +173,6 @@ export async function GET(req) {
     // Küme düşen takımları belirle
     const relegatedTeams = getRelegatedTeams(standingsData, lig);
     const relegatePlayoffTeams = getRelegatePlayoffTeams(standingsData, lig);
-    console.log(relegatePlayoffTeams);
 
     // Düşme durumunu güncelle
     standingsData.forEach((team) => {
