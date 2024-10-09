@@ -40,15 +40,15 @@ const Table = ({ data, liveScores, tableHeader, tableData }) => (
 function europeanCompetition(europeanCompetition) {
   switch (europeanCompetition) {
     case "Champions League":
-      return "bg-blue-600";
+      return "blue-600";
     case "Champions League Qualifiers":
-      return "bg-blue-800";
+      return "blue-800";
     case "Europa League":
-      return "bg-orange-600";
+      return "orange-600";
     case "Conference League":
-      return "bg-green-600";
+      return "green-600";
     case "Conference League Qualifiers":
-      return "bg-green-800";
+      return "green-800";
     default:
       break;
   }
@@ -57,9 +57,9 @@ function europeanCompetition(europeanCompetition) {
 function relegationStatus(relegationStatus) {
   switch (relegationStatus) {
     case true:
-      return "bg-red-800";
+      return "red-800";
     case "playoff":
-      return "bg-orange-700";
+      return "orange-700";
     default:
       break;
   }
@@ -73,9 +73,9 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
   >
     <td className="relative px-1 py-2 sm:px-4 text-white flex items-center gap-2">
       <div
-        className={`absolute left-0 top-0 bottom-0 w-1 ${europeanCompetition(
+        className={`absolute left-0 top-0 bottom-0 w-1 bg-${europeanCompetition(
           team.europeanCompetition
-        )} ${relegationStatus(team.relegationStatus)}`}
+        )} bg-${relegationStatus(team.relegationStatus)}`}
       ></div>
       <span className="text-foreground font-bold ml-1 sm:ml-0 w-5 text-center sm:text-lg">
         {team.rank}
@@ -113,33 +113,35 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
 );
 
 const LiveScoreIndicator = ({ team, liveScores }) => {
-  return liveScores ? liveScores.map((liveScore) => {
-    const isHomeTeam = team.id == liveScore.homeTeam.id;
-    const isAwayTeam = team.id == liveScore.awayTeam.id;
-    const [homeScore, awayScore] = liveScore.score.split(":").map(Number);
+  return liveScores
+    ? liveScores.map((liveScore) => {
+        const isHomeTeam = team.id == liveScore.homeTeam.id;
+        const isAwayTeam = team.id == liveScore.awayTeam.id;
+        const [homeScore, awayScore] = liveScore.score.split(":").map(Number);
 
-    if (isHomeTeam || isAwayTeam) {
-      const isHalfTime = liveScore.score.split(" ")[1];
+        if (isHomeTeam || isAwayTeam) {
+          const isHalfTime = liveScore.score.split(" ")[1];
 
-      const backgroundColor = getScoreBackgroundColor(
-        homeScore,
-        awayScore,
-        isHomeTeam,
-        isAwayTeam,
-        isHalfTime
-      );
-      return (
-        <span
-          key={liveScore.time}
-          className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto ${backgroundColor}`}
-        >
-          {liveScore.score.split(" ")[0]}{" "}
-          {liveScore.score.split(" ")[1] ? "İY" : null}
-        </span>
-      );
-    }
-    return null;
-  }) : null;
+          const backgroundColor = getScoreBackgroundColor(
+            homeScore,
+            awayScore,
+            isHomeTeam,
+            isAwayTeam,
+            isHalfTime
+          );
+          return (
+            <span
+              key={liveScore.time}
+              className={`px-1.5 py-0.5 font-semibold text-xs md:text-sm rounded-md ml-auto ${backgroundColor}`}
+            >
+              {liveScore.score.split(" ")[0]}{" "}
+              {liveScore.score.split(" ")[1] ? "İY" : null}
+            </span>
+          );
+        }
+        return null;
+      })
+    : null;
 };
 
 const getScoreBackgroundColor = (
