@@ -71,7 +71,7 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
       idx % 2 === 0 ? "bg-transparent" : "bg-zinc-800"
     } hover:bg-zinc-700`}
   >
-    <td className="relative px-1 py-2 sm:px-4 text-white flex items-center">
+    <td className="relative px-1 py-2 sm:px-4 text-white flex items-center gap-2">
       <div
         className={`absolute left-0 top-0 bottom-0 w-1 ${europeanCompetition(
           team.europeanCompetition
@@ -80,9 +80,7 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
       <span className="text-foreground font-bold ml-1 sm:ml-0 w-5 text-center sm:text-lg">
         {team.rank}
       </span>
-      <div className="relative w-7 h-7 ml-3 mr-1.5 my-0.5">
-        {" "}
-        {/* Resim için yatay boşluk */}
+      <div className="relative w-7 h-7 my-0.5">
         <Image
           src={team.logo}
           alt={`${team.name} Logo`}
@@ -92,7 +90,7 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
           } ${team.team === "Antalyaspor" ? "bg-white rounded-full" : ""} `} // Resmin kapsayıcıya göre ayarlanmasını sağlar
         />
       </div>
-      <span className="ml-1">{team.team}</span>
+      <span className="">{team.team}</span>
       {liveScores ? (
         <LiveScoreIndicator team={team} liveScores={liveScores} />
       ) : null}

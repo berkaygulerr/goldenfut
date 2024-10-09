@@ -26,12 +26,12 @@ const teamNameMap = {
 };
 
 const logoName = {
-  Samsunspor: "sm.png",
-  Beşiktaş: "bjk.png",
-  Eyüpspor: "eyp.png",
-  "Bodrum FK": "bdr.png",
-  Hatayspor: "hty.png",
-  "Adana Demirspor": "ads.png",
+  Samsunspor: "sm",
+  Beşiktaş: "bjk",
+  Eyüpspor: "eyp",
+  "Bodrum FK": "bdr",
+  Hatayspor: "hty",
+  "Adana Demirspor": "ads",
 };
 
 // Takım adını kontrol edip, gerekiyorsa Türkçeye çeviren fonksiyon
@@ -142,7 +142,7 @@ export async function GET(req) {
 
       const team = teams.find((t) => t.name === teamName); // teams dizisinde eşleşen takımı bul
       const logo = logoName[teamName]
-        ? `/logos/${logoName[teamName]}`
+        ? `/logos/${logoName[teamName]}.webp`
         : $(element).find("td:nth-child(2) img").attr("src"); // Logo URL'si
 
       const rank = parseInt(
