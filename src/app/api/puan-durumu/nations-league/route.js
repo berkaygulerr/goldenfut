@@ -87,7 +87,9 @@ export async function GET(req) {
 
     return new Response(JSON.stringify(standings, null, 2), {
       headers: {
-        "Cache-Control": "no-store", // Cache'i tamamen devre dışı bırakır
+        "Cache-Control": "no-store",
+        revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
+        // Cache'i tamamen devre dışı bırakır
       },
     });
   } catch (error) {

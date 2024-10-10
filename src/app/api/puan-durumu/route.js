@@ -184,6 +184,7 @@ export async function GET(req) {
     return NextResponse.json(standingsData, {
       headers: {
         "Cache-Control": "public, s-maxage=15, stale-while-revalidate=59",
+        revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
       },
     });
   } catch (error) {
