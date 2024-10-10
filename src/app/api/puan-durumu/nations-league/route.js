@@ -87,7 +87,7 @@ export async function GET(req) {
 
     return new Response(JSON.stringify(standings, null, 2), {
       headers: {
-        "Cache-Control": "public, s-maxage=15, stale-while-revalidate=59",
+        "Cache-Control": "no-store", // Cache'i tamamen devre dışı bırakır
       },
     });
   } catch (error) {
