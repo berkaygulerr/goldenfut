@@ -33,7 +33,12 @@ export async function GET(req) {
   try {
     const url = "https://www.foxsports.com/soccer/nations-league/standings";
 
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      cache: "no-store", // Tarayıcıya verileri önbelleğe almamasını söyler
+      headers: {
+        "Cache-Control": "no-cache", // Sunucuya yanıtın önbelleğe alınmaması gerektiğini söyler
+      },
+    });
 
     if (!response.ok) throw new Error(`HTTP hata: ${response.status}`);
 

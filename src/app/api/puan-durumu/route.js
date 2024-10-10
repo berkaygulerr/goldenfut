@@ -119,7 +119,12 @@ export async function GET(req) {
     const url = `https://www.foxsports.com/soccer/${lig}/standings`;
 
     // Sayfanın HTML içeriğini al
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      cache: "no-store", // Tarayıcıya verileri önbelleğe almamasını söyler
+      headers: {
+        "Cache-Control": "no-cache", // Sunucuya yanıtın önbelleğe alınmaması gerektiğini söyler
+      },
+    });
 
     if (!response.ok) throw new Error(`HTTP hata: ${response.status}`);
 
@@ -183,8 +188,9 @@ export async function GET(req) {
 
     return NextResponse.json(standingsData, {
       headers: {
-        "Cache-Control": "public, s-maxage=15, stale-while-revalidate=59",
+        "Cache-Control": "no-store",
         revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
+        // Cache'i tamamen devre dışı bırakır
       },
     });
   } catch (error) {
