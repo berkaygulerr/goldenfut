@@ -142,7 +142,7 @@ const NationsLeague = () => {
           width={120}
           height={64}
         />
-        <h1 className={`${michroma.className} text-3xl font-bold`}>
+        <h1 className={`${michroma.className} text-xl md:text-3xl text-right`}>
           Canlı Puan Durumu
         </h1>
       </div>
