@@ -33,9 +33,7 @@ export async function GET(req) {
   try {
     const url = "https://www.foxsports.com/soccer/nations-league/standings";
 
-    const response = await fetch(url, {
-      next: { revalidate: 15 },
-    });
+    const response = await fetch(url);
 
     if (!response.ok) throw new Error(`HTTP hata: ${response.status}`);
 
@@ -88,7 +86,9 @@ export async function GET(req) {
     });
 
     return new Response(JSON.stringify(standings, null, 2), {
-      status: 200,
+      headers: {
+        "Cache-Control": "public, s-maxage=15, stale-while-revalidate=59",
+      },
     });
   } catch (error) {
     console.error(error);

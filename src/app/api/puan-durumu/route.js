@@ -119,9 +119,7 @@ export async function GET(req) {
     const url = `https://www.foxsports.com/soccer/${lig}/standings`;
 
     // Sayfanın HTML içeriğini al
-    const response = await fetch(url, {
-      next: { revalidate: 15 },
-    });
+    const response = await fetch(url);
 
     if (!response.ok) throw new Error(`HTTP hata: ${response.status}`);
 
@@ -183,7 +181,11 @@ export async function GET(req) {
       }
     });
 
-    return NextResponse.json(standingsData);
+    return NextResponse.json(standingsData, {
+      headers: {
+        "Cache-Control": "public, s-maxage=15, stale-while-revalidate=59",
+      },
+    });
   } catch (error) {
     console.error("Hata:", error);
     return NextResponse.json(
