@@ -3,12 +3,21 @@
 import React from "react";
 import Standings from "./components/Standings";
 import { Michroma } from "next/font/google";
+import LeagueCard from "./components/LeagueCard";
 
 const michroma = Michroma({ weight: "400", subsets: ["latin"] });
 
 export default function Home() {
   return (
     <div className="container mx-auto">
+      <div className='flex justify-center md:justify-start'>
+        <LeagueCard
+          logo={"/images/nations.svg"}
+          name="Uluslar Ligi"
+          link="/uluslar-ligi"
+        />
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         <div className="lg:col-span-6">
           <Standings />

@@ -2,7 +2,13 @@ import React from "react";
 import Image from "next/image";
 
 const Table = ({ data, liveScores, tableHeader, tableData }) => (
-  <div className="flex-none w-full min-w-[240px] sm:min-w-[280px] md:min-w-[350px]">
+  <div
+    className={`text-xs lg:text-base flex-none w-full min-w-[240px] sm:min-w-[280px] md:min-w-[350px] shadow ${
+      data[0].league === "nations-league"
+        ? "overflow-y-hidden rounded-b-lg rounded-tr-lg"
+        : ""
+    }`}
+  >
     <table className="min-w-full border-gray-300 rounded-lg">
       <thead>
         <tr className="bg-foreground text-background uppercase">
@@ -69,7 +75,7 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
   <tr
     className={`${
       idx % 2 === 0 ? "bg-transparent" : "bg-zinc-800"
-    } hover:bg-zinc-700`}
+    } hover:bg-zinc-700 transition-all`}
   >
     <td className="relative px-1 py-2 sm:px-4 text-white flex items-center gap-2">
       <div
