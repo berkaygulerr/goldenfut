@@ -88,7 +88,7 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
       </span>
       <div className="relative w-7 h-7 my-0.5">
         <Image
-          src={team.logo}
+          src={team.logo ? team.logo : '/images/nations.svg'}
           alt={`${team.name} Logo`}
           fill
           className={`object-contain ${

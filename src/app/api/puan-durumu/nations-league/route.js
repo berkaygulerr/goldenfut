@@ -32,71 +32,50 @@ const groupNamesTr = [
 
 export async function GET(req) {
   try {
-    const url = "https://www.foxsports.com/soccer/nations-league/standings";
-
-    const response = await axios.get(url, {
-      headers: {
-        "Cache-Control": "no-cache",
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-        "Cache-Control": "no-cache, no-store, must-revalidate", // Sunucuya önbelleğe alınmaması gerektiğini belirtir
-        Pragma: "no-cache",
-        Expires: "0",
+    const options = {
+      method: "GET",
+      url: "https://free-api-live-football-data.p.rapidapi.com/football-league-standings-total",
+      params: {
+        leagueid: "10783",
+        seasonid: "58337",
       },
-    });
+      headers: {
+        "x-rapidapi-key": process.env.API_KEY,
+        "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com",
+      },
+    };
 
-    if (response.status !== 200)
-      throw new Error(`HTTP hata: ${response.status}`);
-
+    const response = await axios.request(options);
     const data = response.data;
-    const $ = cheerio.load(data);
+    const standings = data.response.standings;
 
-    const standings = {};
-    const teamNames = readTeamNamesFromJson(); // JSON'dan takım isimlerini oku
+    const groups = {};
 
-    // Takım isimlerini bir nesneye çevir (id => team)
-    const teamMap = {};
-    teamNames.forEach((team) => {
-      teamMap[team.id] = team.team; // id'ye göre takım ismini eşleştir
+    await standings.forEach((standing) => {
+      groups[standing.name] = [];
+
+      standing.rows.forEach((team) => {
+        const teamData = {
+          rank: team.position,
+          team: team.team.name,
+          id: team.id,
+          played: team.matches,
+          win: team.wins,
+          draw: team.draws,
+          lose: team.losses,
+          goalfor: team.scoresFor,
+          goalagainst: team.scoresAgainst,
+          goaldistance: team.scoresFor - team.scoresAgainst,
+          point: team.points,
+          logo: '',
+          league: "nations-league",
+        };
+
+        groups[standing.name].push(teamData);
+      });
     });
 
-    $("table").each((index, element) => {
-      const groupName = groupNamesTr[index];
-
-      standings[groupName] = [];
-
-      $(element)
-        .find("tbody tr")
-        .each((_, row) => {
-          const cols = $(row).find("td");
-          const teamDataURI =
-            $(cols[1]).find("a.table-entity-name").attr("data-uri") || "";
-          const id = teamDataURI ? teamDataURI.split("/").pop() : null;
-
-          // Eşleşmiş takım ismini al
-          const teamNameTr = teamMap[id] || "Bilinmeyen Takım"; // Eğer id yoksa varsayılan isim
-
-          const teamData = {
-            rank: $(cols[0]).text().trim(),
-            team: teamNameTr, // Eşleşmiş takım ismi
-            id: id,
-            played: $(cols[2]).text().trim(),
-            win: $(cols[4]).text().trim().split("-")[0] || "0",
-            draw: $(cols[4]).text().trim().split("-")[1] || "0",
-            lose: $(cols[4]).text().trim().split("-")[2] || "0",
-            goalfor: $(cols[5]).text().trim(),
-            goalagainst: $(cols[6]).text().trim(),
-            goaldistance: $(cols[7]).text().trim(),
-            point: $(cols[3]).text().trim(),
-            logo: $(cols[1]).find("img").attr("src"),
-            league: "nations-league",
-          };
-
-          standings[groupName].push(teamData);
-        });
-    });
-
-    return new Response(JSON.stringify(standings, null, 2), {
+    return new Response(JSON.stringify(groups, null, 2), {
       headers: {
         "Cache-Control": "no-store",
         revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
