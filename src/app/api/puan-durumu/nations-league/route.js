@@ -1,6 +1,7 @@
 import cheerio from "cheerio";
 import fs from "fs";
 import path from "path";
+import axios from "axios";
 
 // JSON dosyasından takım isimlerini oku
 function readTeamNamesFromJson() {
@@ -33,16 +34,16 @@ export async function GET(req) {
   try {
     const url = "https://www.foxsports.com/soccer/nations-league/standings";
 
-    const response = await fetch(url, {
-      cache: "no-store", // Tarayıcıya verileri önbelleğe almamasını söyler
+    const response = await axios.get(url, {
       headers: {
         "Cache-Control": "no-cache", // Sunucuya yanıtın önbelleğe alınmaması gerektiğini söyler
       },
     });
 
-    if (!response.ok) throw new Error(`HTTP hata: ${response.status}`);
+    if (response.status !== 200)
+      throw new Error(`HTTP hata: ${response.status}`);
 
-    const data = await response.text();
+    const data = response.data;
     const $ = cheerio.load(data);
 
     const standings = {};
@@ -94,7 +95,6 @@ export async function GET(req) {
       headers: {
         "Cache-Control": "no-store",
         revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
-        // Cache'i tamamen devre dışı bırakır
       },
     });
   } catch (error) {
