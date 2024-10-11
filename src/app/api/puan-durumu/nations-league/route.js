@@ -53,8 +53,10 @@ export async function GET(req) {
 
     const groups = {};
 
-    await standings.forEach((standing) => {
-      groups[standing.name] = [];
+    await standings.forEach((standing, index) => {
+      const groupName = groupNamesTr[index];
+
+      groups[groupName] = [];
 
       standing.rows.forEach((team) => {
         const teamData = {
@@ -73,7 +75,7 @@ export async function GET(req) {
           league: "nations-league",
         };
 
-        groups[standing.name].push(teamData);
+        groups[groupName].push(teamData);
       });
     });
 
