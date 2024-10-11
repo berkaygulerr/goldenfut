@@ -53,15 +53,62 @@ export async function GET(req) {
 
     const groups = {};
 
+    const responseFox = await axios.get("https://www.foxsports.com/soccer/nations-league/standings", {
+      headers: {
+        "Cache-Control": "no-cache",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+    });
+
+    if (response.status !== 200)
+      throw new Error(`HTTP hata: ${response.status}`);
+
+    const dataFox = responseFox.data;
+    const $ = cheerio.load(dataFox);
+    const standingsFox = {};
+    const teamNames = readTeamNamesFromJson(); // JSON'dan takım isimlerini oku
+
+    // Takım isimlerini bir nesneye çevir (id => team)
+    const teamMap = {};
+    teamNames.forEach((team) => {
+      teamMap[team.id] = team.team; // id'ye göre takım ismini eşleştir
+    });
+
+    await $("table").each((index, element) => {
+      const groupName = groupNamesTr[index];
+
+      standingsFox[groupName] = [];
+
+      $(element)
+        .find("tbody tr")
+        .each((_, row) => {
+          const cols = $(row).find("td");
+          const teamDataURI =
+            $(cols[1]).find("a.table-entity-name").attr("data-uri") || "";
+          const id = teamDataURI ? teamDataURI.split("/").pop() : null;
+
+          // Eşleşmiş takım ismini al
+          const teamNameTr = teamMap[id] || "Bilinmeyen Takım"; // Eğer id yoksa varsayılan isim
+
+          const teamData = {
+            team: teamNameTr,
+            logo: $(cols[1]).find("img").attr("src"),
+          };
+
+          standingsFox[groupName].push(teamData);
+        });
+    });
+
     await standings.forEach((standing, index) => {
       const groupName = groupNamesTr[index];
 
       groups[groupName] = [];
 
-      standing.rows.forEach((team) => {
+      standing.rows.forEach((team, index) => {
         const teamData = {
           rank: team.position,
-          team: team.team.name,
+          team: standingsFox[groupName][index].team,
           id: team.id,
           played: team.matches,
           win: team.wins,
@@ -71,7 +118,7 @@ export async function GET(req) {
           goalagainst: team.scoresAgainst,
           goaldistance: team.scoresFor - team.scoresAgainst,
           point: team.points,
-          logo: "",
+          logo: standingsFox[groupName][index].logo,
           league: "nations-league",
         };
 
