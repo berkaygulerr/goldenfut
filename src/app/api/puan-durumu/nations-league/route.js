@@ -45,7 +45,9 @@ export async function GET(req) {
       },
     };
 
-    const response = await axios.request(options);
+    const response = await axios.request(options, {
+      headers: { "Cache-Control": "no-cache" },
+    });
     const data = response.data;
     const standings = data.response.standings;
 
@@ -67,7 +69,7 @@ export async function GET(req) {
           goalagainst: team.scoresAgainst,
           goaldistance: team.scoresFor - team.scoresAgainst,
           point: team.points,
-          logo: '',
+          logo: "",
           league: "nations-league",
         };
 
