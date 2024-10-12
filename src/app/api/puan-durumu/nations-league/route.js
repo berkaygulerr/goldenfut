@@ -86,7 +86,7 @@ export async function GET(req) {
       })
     );
 
-    return NextResponse.json(liveScores, {
+    return NextResponse.json(groups, {
       headers: {
         "Cache-Control": "public, s-maxage=15, max-age=15",
         "CDN-Cache-Control": "public, s-maxage=15",
