@@ -35,19 +35,21 @@ export async function GET(req) {
     const liveScores = [];
 
     if (liveScoresAPI) {
-      await liveScoresAPI.forEach((liveScore, index) => {
-        liveScores.push({
-          homeTeam: {
-            name: liveScore.homeTeam.name,
-            slug: liveScore.homeTeam.slug,
-          },
-          score: `${liveScore.homeScore.current}:${liveScore.awayScore.current}`,
-          awayTeam: {
-            name: liveScore.awayTeam.name,
-            slug: liveScore.awayTeam.slug,
-          },
-        });
-      });
+      await Promise.all(
+        liveScoresAPI.map((liveScore) => {
+          liveScores.push({
+            homeTeam: {
+              name: liveScore.homeTeam.name,
+              slug: liveScore.homeTeam.slug,
+            },
+            score: `${liveScore.homeScore.current}:${liveScore.awayScore.current}`,
+            awayTeam: {
+              name: liveScore.awayTeam.name,
+              slug: liveScore.awayTeam.slug,
+            },
+          });
+        })
+      );
     }
 
     // Cache-Control başlığıyla cache'i devre dışı bırak

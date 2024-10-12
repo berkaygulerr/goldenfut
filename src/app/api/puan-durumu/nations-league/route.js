@@ -54,35 +54,37 @@ export async function GET(req) {
     const standings = data.response.standings;
 
     const teamTranslations = loadTeamTranslations();
-
     const groups = {};
 
-    await standings.forEach(async (standing, index) => {
-      const groupName = groupNamesTr[index];
+    await Promise.all(
+      standings.map(async (standing, index) => {
+        const groupName = groupNamesTr[index];
+        groups[groupName] = [];
 
-      groups[groupName] = [];
+        await Promise.all(
+          standing.rows.map((team) => {
+            const teamData = {
+              rank: team.position,
+              team: teamTranslations[team.id]?.name || team.team.name,
+              slug: team.team.slug,
+              id: team.id,
+              played: team.matches,
+              win: team.wins,
+              draw: team.draws,
+              lose: team.losses,
+              goalfor: team.scoresFor,
+              goalagainst: team.scoresAgainst,
+              goaldistance: team.scoresFor - team.scoresAgainst,
+              point: team.points,
+              logo: teamTranslations[team.id]?.logo,
+              league: "nations-league",
+            };
 
-      await standing.rows.forEach((team) => {
-        const teamData = {
-          rank: team.position,
-          team: teamTranslations[team.id]?.name || team.team.name,
-          slug: team.team.slug,
-          id: team.id,
-          played: team.matches,
-          win: team.wins,
-          draw: team.draws,
-          lose: team.losses,
-          goalfor: team.scoresFor,
-          goalagainst: team.scoresAgainst,
-          goaldistance: team.scoresFor - team.scoresAgainst,
-          point: team.points,
-          logo: teamTranslations[team.id]?.logo,
-          league: "nations-league",
-        };
-
-        groups[groupName].push(teamData);
-      });
-    });
+            groups[groupName].push(teamData);
+          })
+        );
+      })
+    );
 
     return NextResponse.json(groups, {
       headers: {
