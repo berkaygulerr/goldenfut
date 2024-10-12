@@ -46,9 +46,7 @@ export async function GET(req) {
       },
     };
 
-    const response = await axios.request(options, {
-      headers: { "Cache-Control": "no-cache" },
-    });
+    const response = await axios.request(options);
 
     const data = response.data;
     const standings = data.response.standings;
@@ -88,7 +86,7 @@ export async function GET(req) {
 
     return NextResponse.json(groups, {
       headers: {
-        "Cache-Control": "public, max-age=15, must-revalidate",
+        "Cache-Control": "public, max-age=60, must-revalidate", // 1 dakika önbellekleme
         Pragma: "no-cache",
         Expires: "0",
         "Surrogate-Control": "no-store",
