@@ -46,7 +46,10 @@ export async function GET(req) {
       },
     };
 
-    const response = await axios.request(options, { cache: "no-store" });
+    const response = await axios.request(options, {
+      headers: { "Cache-Control": "no-cache" },
+    });
+
     const data = response.data;
     const standings = data.response.standings;
 
