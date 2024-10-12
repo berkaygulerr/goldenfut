@@ -46,7 +46,9 @@ export async function GET(req) {
       },
     };
 
-    const response = await axios.request(options);
+    const response = await axios.request(options, {
+      headers: { "Cache-Control": "no-cache" },
+    });
 
     const data = response.data;
     const standings = data.response.standings;
@@ -84,12 +86,11 @@ export async function GET(req) {
       })
     );
 
-    return NextResponse.json(groups, {
+    return NextResponse.json(liveScores, {
       headers: {
-        "Cache-Control":
-          "no-store, no-cache, must-revalidate, proxy-revalidate", // Ön belleği devre dışı bırak
-        Pragma: "no-cache",
-        Expires: "0",
+        "Cache-Control": "public, s-maxage=15, max-age=15",
+        "CDN-Cache-Control": "public, s-maxage=15",
+        "Vercel-CDN-Cache-Control": "public, s-maxage=15",
       },
     });
   } catch (error) {
