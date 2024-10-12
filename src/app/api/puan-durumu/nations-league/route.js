@@ -67,7 +67,7 @@ export async function GET(req) {
               rank: team.position,
               team: teamTranslations[team.id]?.name || team.team.name,
               slug: team.team.slug,
-              id: team.id,
+              id: team.team.id,
               played: team.matches,
               win: team.wins,
               draw: team.draws,
