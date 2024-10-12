@@ -1,17 +1,10 @@
-import cheerio from "cheerio";
+import axios from "axios";
+import * as deepl from "deepl-node";
 import fs from "fs";
 import path from "path";
-import axios from "axios";
 
-// JSON dosyasından takım isimlerini oku
-function readTeamNamesFromJson() {
-  const filePath = path.join(process.cwd(), "data", "teamNames.json");
-  if (fs.existsSync(filePath)) {
-    const data = fs.readFileSync(filePath);
-    return JSON.parse(data);
-  }
-  return []; // Dosya yoksa boş dizi döner
-}
+const authKey = process.env.DEEPL_API_KEY; // DeepL API anahtarınızı buraya ekleyin
+const translator = new deepl.Translator(authKey);
 
 const groupNamesTr = [
   "A LİGİ, 1. GRUP",
@@ -30,7 +23,35 @@ const groupNamesTr = [
   "D LİGİ, 2. GRUP",
 ];
 
+// Sunucu tarafı cache için global değişken
+let cachedData = null;
+let cacheTime = null;
+
+function loadTeamTranslations() {
+  try {
+    const dataPath = path.join(process.cwd(), "data", "team-translations.json");
+    const fileData = fs.readFileSync(dataPath, "utf8");
+    return JSON.parse(fileData);
+  } catch (error) {
+    console.error("Error loading team translations:", error);
+    return {};
+  }
+}
+
 export async function GET(req) {
+  const cacheDuration = 15000; // 15 saniyelik cache süresi
+
+  // Cache kontrolü
+  if (cachedData && cacheTime && Date.now() - cacheTime < cacheDuration) {
+    console.log("Veri cache'den alındı");
+    return new Response(JSON.stringify(cachedData, null, 2), {
+      headers: {
+        "Cache-Control": "no-store",
+        revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
+      },
+    });
+  }
+
   try {
     const options = {
       method: "GET",
@@ -51,64 +72,19 @@ export async function GET(req) {
     const data = response.data;
     const standings = data.response.standings;
 
+    const teamTranslations = loadTeamTranslations(); // Dosyadan çevirileri yükle
+
     const groups = {};
 
-    const responseFox = await axios.get("https://www.foxsports.com/soccer/nations-league/standings", {
-      headers: {
-        "Cache-Control": "no-cache",
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-      },
-    });
-
-    if (response.status !== 200)
-      throw new Error(`HTTP hata: ${response.status}`);
-
-    const dataFox = responseFox.data;
-    const $ = cheerio.load(dataFox);
-    const standingsFox = {};
-    const teamNames = readTeamNamesFromJson(); // JSON'dan takım isimlerini oku
-
-    // Takım isimlerini bir nesneye çevir (id => team)
-    const teamMap = {};
-    teamNames.forEach((team) => {
-      teamMap[team.id] = team.team; // id'ye göre takım ismini eşleştir
-    });
-
-    await $("table").each((index, element) => {
-      const groupName = groupNamesTr[index];
-
-      standingsFox[groupName] = [];
-
-      $(element)
-        .find("tbody tr")
-        .each((_, row) => {
-          const cols = $(row).find("td");
-          const teamDataURI =
-            $(cols[1]).find("a.table-entity-name").attr("data-uri") || "";
-          const id = teamDataURI ? teamDataURI.split("/").pop() : null;
-
-          // Eşleşmiş takım ismini al
-          const teamNameTr = teamMap[id] || "Bilinmeyen Takım"; // Eğer id yoksa varsayılan isim
-
-          const teamData = {
-            team: teamNameTr,
-            logo: $(cols[1]).find("img").attr("src"),
-          };
-
-          standingsFox[groupName].push(teamData);
-        });
-    });
-
-    await standings.forEach((standing, index) => {
+    standings.forEach((standing, index) => {
       const groupName = groupNamesTr[index];
 
       groups[groupName] = [];
 
-      standing.rows.forEach((team, index) => {
+      standing.rows.forEach((team) => {
         const teamData = {
           rank: team.position,
-          team: standingsFox[groupName][index].team,
+          team: teamTranslations[team.id].name || team.team.name, // ID'ye göre çeviriyi al, yoksa orijinal ismi kullan
           id: team.id,
           played: team.matches,
           win: team.wins,
@@ -118,13 +94,17 @@ export async function GET(req) {
           goalagainst: team.scoresAgainst,
           goaldistance: team.scoresFor - team.scoresAgainst,
           point: team.points,
-          logo: standingsFox[groupName][index].logo,
+          logo: teamTranslations[team.id].logo,
           league: "nations-league",
         };
 
         groups[groupName].push(teamData);
       });
     });
+
+    // Yeni veriyi cache'e kaydet
+    cachedData = groups;
+    cacheTime = Date.now();
 
     return new Response(JSON.stringify(groups, null, 2), {
       headers: {
