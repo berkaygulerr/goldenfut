@@ -88,7 +88,7 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
       </span>
       <div className="relative w-7 h-7 my-0.5">
         <Image
-          src={team.logo ? team.logo : '/images/nations.svg'}
+          src={team.logo ? team.logo : "/images/nations.svg"}
           alt={`${team.name} Logo`}
           fill
           className={`object-contain ${
@@ -119,10 +119,11 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
 );
 
 const LiveScoreIndicator = ({ team, liveScores }) => {
+  console.log("team:", team.id, liveScores[0].homeTeam.id, liveScores[0].awayTeam.id);
   return liveScores
     ? liveScores.map((liveScore) => {
-        const isHomeTeam = team.id == liveScore.homeTeam.id;
-        const isAwayTeam = team.id == liveScore.awayTeam.id;
+        const isHomeTeam = team.slug == liveScore.homeTeam.slug;
+        const isAwayTeam = team.slug == liveScore.awayTeam.slug;
         const [homeScore, awayScore] = liveScore.score.split(":").map(Number);
 
         if (isHomeTeam || isAwayTeam) {

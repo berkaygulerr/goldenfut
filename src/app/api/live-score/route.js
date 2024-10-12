@@ -4,12 +4,12 @@ import axios from "axios";
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
-    const lig = searchParams.get("lig"); // Lig parametresini al
+    const lig = searchParams.get("country"); // Lig parametresini al
 
     let leagueId = "";
 
     switch (lig) {
-      case "nations-league":
+      case "europe":
         leagueId = 1465;
         break;
 
@@ -39,38 +39,25 @@ export async function GET(req) {
         liveScores.push({
           homeTeam: {
             name: liveScore.homeTeam.name,
-            id: liveScore.homeTeam.id,
+            slug: liveScore.homeTeam.slug,
           },
           score: `${liveScore.homeScore.current}:${liveScore.awayScore.current}`,
           awayTeam: {
             name: liveScore.awayTeam.name,
-            id: liveScore.awayTeam.id,
+            slug: liveScore.awayTeam.slug,
           },
-          league: lig,
         });
       });
     }
 
-    // liveScores.push({
-    //   time,
-    //   homeTeam: {
-    //     name: homeTeamName,
-    //     id: homeTeamId,
-    //   },
-    //   score,
-    //   awayTeam: {
-    //     name: awayTeamName,
-    //     id: awayTeamId,
-    //   },
-    //   league: leagueData.lig,
-    // });
-
     // Cache-Control başlığıyla cache'i devre dışı bırak
     return NextResponse.json(liveScores, {
       headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Cache-Control": "public, max-age=15, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
       },
-      revalidate: 0, // Her istekte güncelle
     });
   } catch (error) {
     console.error("Hata:", error);

@@ -71,16 +71,39 @@ const NationsLeague = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [liveScores, setLiveScores] = useState(null);
 
   useEffect(() => {
     fetchData();
+    fetchLiveScore()
 
     const intervalId = setInterval(() => {
       fetchData(false);
+      fetchLiveScore();
     }, 30000);
 
     return () => clearInterval(intervalId);
   }, []);
+
+  const fetchLiveScore = async () => {
+    try {
+      const response = await fetch("/api/live-score?country=europe");
+      if (!response.ok) throw new Error(`HTTP hatası: ${response.status}`);
+
+      const data = await response.json();
+
+      // Eğer API'den dönen veri varsa, liveScores'u güncelle
+      if (data && data.length > 0) {
+        setLiveScores(data);
+      } else {
+        // Eğer API'den dönen veri yoksa, liveScores'u boş bir diziye set et
+        setLiveScores([]);
+        console.warn("Canlı skor verisi boş döndü!");
+      }
+    } catch (error) {
+      console.error("Canlı skor verisi çekilirken hata oluştu:", error);
+    }
+  };
 
   const fetchData = async (initialLoad = true) => {
     if (initialLoad) setLoading(true);
@@ -167,6 +190,7 @@ const NationsLeague = () => {
                 "goalagainst",
                 "goaldistance",
               ]}
+              liveScores={liveScores}
             />
           </div>
         ))}

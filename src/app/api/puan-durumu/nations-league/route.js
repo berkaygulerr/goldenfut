@@ -63,6 +63,7 @@ export async function GET(req) {
         const teamData = {
           rank: team.position,
           team: teamTranslations[team.id]?.name || team.team.name,
+          slug: team.team.slug,
           id: team.id,
           played: team.matches,
           win: team.wins,
