@@ -119,7 +119,6 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
 );
 
 const LiveScoreIndicator = ({ team, liveScores }) => {
-  console.log("team:", team.id, liveScores[0].homeTeam.id, liveScores[0].awayTeam.id);
   return liveScores
     ? liveScores.map((liveScore) => {
         const isHomeTeam = team.slug == liveScore.homeTeam.slug;
