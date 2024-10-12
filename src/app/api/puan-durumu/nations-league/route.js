@@ -88,9 +88,10 @@ export async function GET(req) {
 
     return NextResponse.json(groups, {
       headers: {
-        "Cache-Control": "public, s-maxage=15, max-age=15",
-        "CDN-Cache-Control": "public, s-maxage=15",
-        "Vercel-CDN-Cache-Control": "public, s-maxage=15",
+        "Cache-Control": "public, max-age=15, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
       },
     });
   } catch (error) {
