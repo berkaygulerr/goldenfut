@@ -1,6 +1,7 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
+import { NextResponse } from "next/server";
 
 const groupNamesTr = [
   "A LİGİ, 1. GRUP",
@@ -49,7 +50,7 @@ export async function GET(req) {
     const data = response.data;
     const standings = data.response.standings;
 
-    const teamTranslations = loadTeamTranslations(); // Dosyadan çevirileri yükle
+    const teamTranslations = loadTeamTranslations();
 
     const groups = {};
 
@@ -61,7 +62,7 @@ export async function GET(req) {
       standing.rows.forEach((team) => {
         const teamData = {
           rank: team.position,
-          team: teamTranslations[team.id]?.name || team.team.name, // ID'ye göre çeviriyi al, yoksa orijinal ismi kullan
+          team: teamTranslations[team.id]?.name || team.team.name,
           id: team.id,
           played: team.matches,
           win: team.wins,
@@ -79,9 +80,9 @@ export async function GET(req) {
       });
     });
 
-    return new Response(JSON.stringify(groups, null, 2), {
+    return NextResponse.json(groups, {
       headers: {
-        "Cache-Control": "public, max-age=15, must-revalidate", // 15 saniye cache tutacak
+        "Cache-Control": "public, max-age=15, must-revalidate",
         Pragma: "no-cache",
         Expires: "0",
         "Surrogate-Control": "no-store",
@@ -89,8 +90,8 @@ export async function GET(req) {
     });
   } catch (error) {
     console.error(error);
-    return new Response(
-      JSON.stringify({ error: "Veri alınırken bir hata oluştu" }),
+    return NextResponse.json(
+      { error: "Veri alınırken bir hata oluştu" },
       { status: 500 }
     );
   }
