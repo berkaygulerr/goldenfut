@@ -57,12 +57,12 @@ export async function GET(req) {
 
     const groups = {};
 
-    standings.forEach((standing, index) => {
+    await standings.forEach(async (standing, index) => {
       const groupName = groupNamesTr[index];
 
       groups[groupName] = [];
 
-      standing.rows.forEach((team) => {
+      await standing.rows.forEach((team) => {
         const teamData = {
           rank: team.position,
           team: teamTranslations[team.id]?.name || team.team.name,
