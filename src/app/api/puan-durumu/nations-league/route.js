@@ -1,3 +1,5 @@
+export const fetchCache = "force-no-store";
+
 import axios from "axios";
 import fs from "fs";
 import path from "path";
@@ -46,9 +48,7 @@ export async function GET(req) {
       },
     };
 
-    const response = await axios.request(options, {
-      headers: { "Cache-Control": "no-cache" },
-    });
+    const response = await axios.request(options, { cache: "no-store" });
 
     const data = response.data;
     const standings = data.response.standings;
@@ -88,10 +88,9 @@ export async function GET(req) {
 
     return NextResponse.json(groups, {
       headers: {
-        "Cache-Control": "public, max-age=15, must-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-        "Surrogate-Control": "no-store",
+        "Cache-Control": "public, max-age=0, must-revalidate",
+        "CDN-Cache-Control": "public, max-age=0, must-revalidate",
+        "Vercel-CDN-Cache-Control": "public, max-age=0, must-revalidate",
       },
     });
   } catch (error) {
