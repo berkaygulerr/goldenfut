@@ -49,9 +49,7 @@ export async function GET(req) {
     };
 
     const response = await axios.request(options, {
-      next: {
-        revalidate: 15,
-      },
+      headers: { "Cache-Control": "no-cache" },
     });
 
     const data = response.data;
@@ -92,9 +90,10 @@ export async function GET(req) {
 
     return NextResponse.json(groups, {
       headers: {
-        "Cache-Control": "public, max-age=0, must-revalidate",
-        "CDN-Cache-Control": "public, max-age=0, must-revalidate",
-        "Vercel-CDN-Cache-Control": "public, max-age=0, must-revalidate",
+        "Cache-Control": "public, max-age=15, must-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
       },
     });
   } catch (error) {
