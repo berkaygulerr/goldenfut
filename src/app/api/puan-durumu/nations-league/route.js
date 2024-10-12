@@ -48,7 +48,11 @@ export async function GET(req) {
       },
     };
 
-    const response = await axios.request(options, { cache: "no-store" });
+    const response = await axios.request(options, {
+      next: {
+        revalidate: 15,
+      },
+    });
 
     const data = response.data;
     const standings = data.response.standings;
