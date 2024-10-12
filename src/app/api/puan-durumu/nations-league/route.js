@@ -3,9 +3,6 @@ import * as deepl from "deepl-node";
 import fs from "fs";
 import path from "path";
 
-const authKey = process.env.DEEPL_API_KEY; // DeepL API anahtarınızı buraya ekleyin
-const translator = new deepl.Translator(authKey);
-
 const groupNamesTr = [
   "A LİGİ, 1. GRUP",
   "A LİGİ, 2. GRUP",
