@@ -1,92 +1,69 @@
 import { NextResponse } from "next/server";
-import cheerio from "cheerio";
+import axios from "axios";
 
-// 6 büyük ligin kodlarını tanımlıyoruz
-const majorLeagues = [
-  { lig: "Süper Lig", code: "TR1" },
-  { lig: "Premier Lig", code: "GB1" },
-  { lig: "LaLiga", code: "ES1" },
-  { lig: "Bundesliga", code: "L1" },
-  { lig: "Serie A", code: "IT1" },
-  { lig: "Ligue 1", code: "FR1" },
-];
-
-export async function GET() {
+export async function GET(req) {
   try {
-    // Transfermarkt canlı skor sayfasının URL'si
-    const url = "https://www.transfermarkt.com/live/";
+    const { searchParams } = new URL(req.url);
+    const lig = searchParams.get("lig"); // Lig parametresini al
 
-    // Fetch ile isteği yap
-    const response = await fetch(url, {
-      next: {
-        revalidate: 15,
-      },
-    });
+    let leagueId = "";
 
-    // Eğer yanıt başarılı değilse hata fırlat
-    if (!response.ok) {
-      throw new Error(`HTTP hata: ${response.status}`);
+    switch (lig) {
+      case "nations-league":
+        leagueId = 1465;
+        break;
+
+      default:
+        break;
     }
 
-    // Yanıtın metin formatındaki içeriğini al
-    const data = await response.text();
+    const options = {
+      method: "GET",
+      url: "https://free-api-live-football-data.p.rapidapi.com/football-categories-live-unique-tournaments",
+      params: { countryid: leagueId },
+      headers: {
+        "x-rapidapi-key": process.env.API_KEY,
+        "x-rapidapi-host": "free-api-live-football-data.p.rapidapi.com",
+      },
+    };
 
-    // Cheerio'yu kullanarak HTML içeriğini parse et
-    const $ = cheerio.load(data);
+    const response = await axios.request(options, {
+      headers: { "Cache-Control": "no-cache" },
+    });
 
-    // 'kategorie' sınıfına sahip divleri seç
-    const categories = $(".kategorie");
-
-    // Verileri saklamak için bir dizi
+    const liveScoresAPI = response.data.response["Live"];
     const liveScores = [];
 
-    // İlk 25 kategori için tabloyu al
-    categories.slice(0, 25).each((index, element) => {
-      const leagueName = $(element).text().trim();
-      const leagueCode = $(element).find("a").attr("href").split("/").pop(); // href'ten kodu al
+    if (liveScoresAPI) {
+      await liveScoresAPI.forEach((liveScore, index) => {
+        liveScores.push({
+          homeTeam: {
+            name: liveScore.homeTeam.name,
+            id: liveScore.homeTeam.id,
+          },
+          score: `${liveScore.homeScore.current}:${liveScore.awayScore.current}`,
+          awayTeam: {
+            name: liveScore.awayTeam.name,
+            id: liveScore.awayTeam.id,
+          },
+          league: lig,
+        });
+      });
+    }
 
-      // Eğer bu lig 6 büyük ligden biriyse, livescore tablosunu al
-      const leagueData = majorLeagues.find((l) => l.code === leagueCode);
-      if (leagueData) {
-        const scoreTable = $(element).next(".livescore"); // hemen altındaki livescore tablosu
-        if (scoreTable.length) {
-          // Tablo satırlarını seç
-          scoreTable.find("tbody tr").each((i, row) => {
-            const time = $(row).find("td:nth-child(1)").text().trim();
-
-            // Ev sahibi takım adı ve id'si
-            const homeTeamElement = $(row).find("td:nth-child(3) a");
-            const homeTeamName = homeTeamElement.text().trim();
-            const homeTeamId = homeTeamElement.attr("href").split("/").pop();
-
-            // Skor bilgisi
-            const score = $(row).find("td:nth-child(4)").text().trim();
-
-            // Deplasman takımı adı ve id'si
-            const awayTeamElement = $(row).find("td:nth-child(5) a");
-            const awayTeamName = awayTeamElement.text().trim();
-            const awayTeamId = awayTeamElement.attr("href").split("/").pop();
-
-            // Eğer time verisi ' ile bitiyorsa, verileri diziye ekle
-            if (time.endsWith("'")) {
-              liveScores.push({
-                time,
-                homeTeam: {
-                  name: homeTeamName,
-                  id: homeTeamId,
-                },
-                score,
-                awayTeam: {
-                  name: awayTeamName,
-                  id: awayTeamId,
-                },
-                league: leagueData.lig,
-              });
-            }
-          });
-        }
-      }
-    });
+    // liveScores.push({
+    //   time,
+    //   homeTeam: {
+    //     name: homeTeamName,
+    //     id: homeTeamId,
+    //   },
+    //   score,
+    //   awayTeam: {
+    //     name: awayTeamName,
+    //     id: awayTeamId,
+    //   },
+    //   league: leagueData.lig,
+    // });
 
     // Cache-Control başlığıyla cache'i devre dışı bırak
     return NextResponse.json(liveScores, {

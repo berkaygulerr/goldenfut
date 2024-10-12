@@ -1,5 +1,4 @@
 import axios from "axios";
-import * as deepl from "deepl-node";
 import fs from "fs";
 import path from "path";
 
@@ -20,10 +19,6 @@ const groupNamesTr = [
   "D LİGİ, 2. GRUP",
 ];
 
-// Sunucu tarafı cache için global değişken
-let cachedData = null;
-let cacheTime = null;
-
 function loadTeamTranslations() {
   try {
     const dataPath = path.join(process.cwd(), "data", "team-translations.json");
@@ -36,19 +31,6 @@ function loadTeamTranslations() {
 }
 
 export async function GET(req) {
-  const cacheDuration = 15000; // 15 saniyelik cache süresi
-
-  // Cache kontrolü
-  if (cachedData && cacheTime && Date.now() - cacheTime < cacheDuration) {
-    console.log("Veri cache'den alındı");
-    return new Response(JSON.stringify(cachedData, null, 2), {
-      headers: {
-        "Cache-Control": "no-store",
-        revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
-      },
-    });
-  }
-
   try {
     const options = {
       method: "GET",
@@ -63,9 +45,7 @@ export async function GET(req) {
       },
     };
 
-    const response = await axios.request(options, {
-      headers: { "Cache-Control": "no-cache" },
-    });
+    const response = await axios.request(options, { cache: "no-store" });
     const data = response.data;
     const standings = data.response.standings;
 
@@ -81,7 +61,7 @@ export async function GET(req) {
       standing.rows.forEach((team) => {
         const teamData = {
           rank: team.position,
-          team: teamTranslations[team.id].name || team.team.name, // ID'ye göre çeviriyi al, yoksa orijinal ismi kullan
+          team: teamTranslations[team.id]?.name || team.team.name, // ID'ye göre çeviriyi al, yoksa orijinal ismi kullan
           id: team.id,
           played: team.matches,
           win: team.wins,
@@ -91,7 +71,7 @@ export async function GET(req) {
           goalagainst: team.scoresAgainst,
           goaldistance: team.scoresFor - team.scoresAgainst,
           point: team.points,
-          logo: teamTranslations[team.id].logo,
+          logo: teamTranslations[team.id]?.logo,
           league: "nations-league",
         };
 
@@ -99,14 +79,12 @@ export async function GET(req) {
       });
     });
 
-    // Yeni veriyi cache'e kaydet
-    cachedData = groups;
-    cacheTime = Date.now();
-
     return new Response(JSON.stringify(groups, null, 2), {
       headers: {
-        "Cache-Control": "no-store",
-        revalidate: 0, // ISR'yi kapatır, sayfa her istekte yeniden oluşturulur
+        "Cache-Control": "public, max-age=15, must-revalidate", // 15 saniye cache tutacak
+        Pragma: "no-cache",
+        Expires: "0",
+        "Surrogate-Control": "no-store",
       },
     });
   } catch (error) {
