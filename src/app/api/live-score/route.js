@@ -41,11 +41,13 @@ export async function GET(req) {
             homeTeam: {
               name: liveScore.homeTeam.name,
               slug: liveScore.homeTeam.slug,
+              id: liveScore.homeTeam.id,
             },
             score: `${liveScore.homeScore.current}:${liveScore.awayScore.current}`,
             awayTeam: {
               name: liveScore.awayTeam.name,
               slug: liveScore.awayTeam.slug,
+              id: liveScore.awayTeam.id,
             },
           });
         })

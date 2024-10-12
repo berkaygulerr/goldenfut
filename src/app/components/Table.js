@@ -121,8 +121,8 @@ const TableRow = ({ team, idx, liveScores, tableData }) => (
 const LiveScoreIndicator = ({ team, liveScores }) => {
   return liveScores
     ? liveScores.map((liveScore) => {
-        const isHomeTeam = team.slug == liveScore.homeTeam.slug;
-        const isAwayTeam = team.slug == liveScore.awayTeam.slug;
+        const isHomeTeam = team.id == liveScore.homeTeam.id;
+        const isAwayTeam = team.id == liveScore.awayTeam.id;
         const [homeScore, awayScore] = liveScore.score.split(":").map(Number);
 
         if (isHomeTeam || isAwayTeam) {
