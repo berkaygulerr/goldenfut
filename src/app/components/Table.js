@@ -123,6 +123,14 @@ const LiveScoreIndicator = ({ team, liveScores }) => {
     ? liveScores.map((liveScore) => {
         const isHomeTeam = team.id == liveScore.homeTeam.id;
         const isAwayTeam = team.id == liveScore.awayTeam.id;
+
+        console.log(
+          "team: ",
+          team.id,
+          "live: ",
+          liveScore.homeTeam.id,
+          liveScore.awayTeam.id
+        );
         const [homeScore, awayScore] = liveScore.score.split(":").map(Number);
 
         if (isHomeTeam || isAwayTeam) {
