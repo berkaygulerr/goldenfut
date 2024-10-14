@@ -109,7 +109,7 @@ const NationsLeague = () => {
     if (initialLoad) setLoading(true);
 
     try {
-      const response = await fetch("https://denemeapi-iim8.onrender.com/api/standings", {
+      const response = await fetch("https://api.goldenfut.com/standing/nations-league", {
         cache: "no-store",
       });
       const data = await response.json();
